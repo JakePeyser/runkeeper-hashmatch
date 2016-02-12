@@ -1,8 +1,8 @@
 {
-  "name": "your-celebrity-match",
-  "version": "2.2.1",
-  "description": "your-celebrity-match uses the Personality Insights service to find a celebrity similar to you based off of your online presence",
-  "private": true,
+  "name": "runkeeper-hashmatch",
+  "version": "1.0.0",
+  "description": "Runkeeper Hashmatch discovers the running hashtag most aligned with your personality by using your Twitter timeline history",
+  "private": false,
   "scripts": {
     "start": "node app.js"
   },
@@ -17,6 +17,7 @@
     "mongoose": "^4.4.2",
     "q": "^2.0.3",
     "twitter": "^0.2.13",
+    "hashmap": "2.0.x",
     "watson-developer-cloud": "^1.2.0"
   },
   "author": "IBM Corp.",
@@ -28,11 +29,15 @@
     {
       "name": "Jeff Stylos",
       "email": "jsstylos@us.ibm.com"
+    },
+    {
+      "name": "Jake Peyser",
+      "email": "jepeyser@us.ibm.com"
     }
   ],
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/watson-developer-cloud/yourcelebritymatch/issues"
+    "url": "https://github.com/JakePeyser/runkeeper-hashmatch/issues"
   },
   "engines": {
     "node": ">=0.12.0"

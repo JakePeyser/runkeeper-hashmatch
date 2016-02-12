@@ -58,19 +58,44 @@ module.exports = {
       image: user.profile_image_url_https
     };
   },
-
   /**
-   * Calculate the euclidean distance between user and celebs
-   * @param  {Object} user   the user object
-   * @param  {Array} celebs the celebs
-   * @return {Array} celebs and distances
+   * Transform a twitter search result to our tweet
+   * @param  {Twitter Tweet} twitter representation of a tweet
+   * @return {models.Tweet}     internal representation of a tweet
    */
-  calculateDistances: function(user, celebs) {
-    return celebs.map(function(celebrity) {
+  toTweet : function(tweet) {
+    return {
+      id: tweet.id_str,
+      tweet: tweet.text,
+      user : {
+        name: tweet.user.name,
+        username: tweet.user.screen_name.toLowerCase(),
+        id: tweet.user.id_str,
+        followers: tweet.user.followers_count,
+        language: tweet.user.lang,
+        location: tweet.user.location,
+        tweets: tweet.user.statuses_count,
+        verified: tweet.user.verified,
+        protected: tweet.user.protected,
+        image: tweet.user.profile_image_url_https
+      },
+      location: tweet.geo,
+      retweets: tweet.retweet_count,
+      favorites: tweet.favorite_count
+    };
+  },
+  /**
+   * Calculate the euclidean distance between user and hashtags
+   * @param  {Object} user the user object
+   * @param  {Array} hashtags the hashtags
+   * @return {Array} hashtags and distances
+   */
+  calculateDistances: function(user, hashtags) {
+    return hashtags.map(function(hashtag) {
       var ret = {
-        user: celebrity,
-        distance: similarity(user.profile, celebrity.profile),
-        profile: flatten.big5(celebrity.profile)
+        hash: hashtag,
+        distance: similarity(user.personality, hashtag.personality, 0),
+        profile: flatten.traits(celebrity.personality, 0)
       };
       return ret;
     }).sort(profileSort);

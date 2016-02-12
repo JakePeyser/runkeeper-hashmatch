@@ -1,16 +1,16 @@
 ---
 declared-services:
-  personality-insights-service-standard:
+  runkeeper-personality-insights:
     label: personality_insights
     plan: tiered
-
 applications:
-- services:
-  - personality-insights-service
-  name: your-celebrity-match
+- name: runkeeper-hashmatch
+  host: runkeeper-hashmatch
   command: npm start
   path: .
   memory: 512M
   env:
     NODE_ENV: production
     SECURE_EXPRESS: 1
+  services:
+  - runkeeper-personality-insights

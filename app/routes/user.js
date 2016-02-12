@@ -21,13 +21,16 @@ var router   = require('express').Router(),
   Q          = require('q'),
   Profile    = mongoose.model('Profile'),
   User       = mongoose.model('User'),
+  Hashtag    = mongoose.model('Hashtag'),
   extend     = require('extend'),
   util       = require('../util/util');
 
 // We're only going to hit the db once for these
 var pics = [];
-var celebs =[];
+var celebs = [];
+var hashtags = [];
 var getCelebrityFromDB = Q.denodeify(Profile.find.bind(Profile));
+var getHashtagFromDB = Q.denodeify(Hashtag.find.bind(Hashtag));
 
 /**
  * Updates an array with the celebrity profile pictures.
@@ -52,7 +55,7 @@ function updateBackground() {
 updateBackground();
 
 
-// Suffle an array with images and username
+// Shuffle an array with images and username
 function shuffle(array) {
   var currentIndex = array.length, temporaryValue, randomIndex ;
 
@@ -123,10 +126,10 @@ router.get('/like/@:username', function (req, res) {
             return extend(dbUser,user);
           }
           else {
-            console.log(username, 'is a new user, lets get his tweets');
+            console.log(username, 'is a new user, lets get their tweets');
 
-            // Get the tweets, profile and add him to the database
-            return getTweets(username)
+            // Get the tweets, profile and add them to the database
+            return getTweets({screen_name:username})
               .then(function(tweets) {
                 console.log(username, 'has', tweets.length, 'tweets');
                 return getProfile({contentItems:tweets})
@@ -149,25 +152,29 @@ router.get('/like/@:username', function (req, res) {
     })
     .then(function(dbUser) {
       if (!dbUser) return;
-      console.log(dbUser.username,'to be comparted to:',celebs.length,'celebrities');
-      var distances = util.calculateDistances(dbUser, celebs);
-      // Remove celebrities to match to themselves
-      if (distances[0].distance === 1.00)
-        distances = distances.slice(1);
 
-      var ret = {
-        user: dbUser,
-        user_profile: flatten.big5(dbUser.profile),
-        // return only the 6 most similar/different profiles
-        similar_celebs: distances.slice(0, Math.min(6, distances.length)),
-        different_celebs: distances.reverse().slice(0, Math.min(6, distances.length)),
-        pics: pics
-      };
-      // Check if the results could be inacurrate because of the number of tweets
-      if (dbUser.tweets < 200)
-        ret.info = 'The more tweets you have, the more accurate your results'+
-        ' will be. 200 or more tweets give the best results';
-      return ret;
+      getHashtagFromDB({}).then(function(returnedHashes) {
+        hashtags = returnedHashes;
+        console.log(dbUser.username,'to be compared to:',hashtags.length,'hashtags');
+        var distances = util.calculateDistances(dbUser, hashtags);
+        // Remove celebrities to match to themselves
+        if (distances[0].distance === 1.00)
+          distances = distances.slice(1);
+
+        var ret = {
+          user: dbUser,
+          user_profile: flatten.traits(dbUser.personality, 0),
+          // return only the 6 most similar/different profiles
+          similar_celebs: distances.slice(0, Math.min(6, distances.length)),
+          different_celebs: distances.reverse().slice(0, Math.min(6, distances.length)),
+          pics: pics
+        };
+        // Check if the results could be inacurrate because of the number of tweets
+        if (dbUser.tweets < 200)
+          ret.info = 'The more tweets you have, the more accurate your results'+
+          ' will be. 200 or more tweets give the best results';
+        return ret;
+      });
     });
   })
   .catch(function (error) {
@@ -205,9 +212,35 @@ router.get('/like/:username', function(req, res) {
 });
 
 
-router.get('/syncdb', function (req, res) {
+router.get('/resetUsers', function (req, res) {
   console.log('remove users from database');
-  var removeAll = Q.nfbind(User.remove.bind(User));
+  var removeAll = Q.denodeify(User.remove.bind(User));
+
+  removeAll({}).then(function(){
+    res.redirect('/');
+  })
+  .catch(function (error) {
+    console.log('error', error);
+    res.redirect('/');
+  });
+});
+
+router.get('/resetProfiles', function (req, res) {
+  console.log('remove profiles from database');
+  var removeAll = Q.denodeify(Profile.remove.bind(Profile));
+
+  removeAll({}).then(function(){
+    res.redirect('/');
+  })
+  .catch(function (error) {
+    console.log('error', error);
+    res.redirect('/');
+  });
+});
+
+router.get('/resetHashtags', function (req, res) {
+  console.log('remove hashtags from database');
+  var removeAll = Q.denodeify(Hashtag.remove.bind(Hashtag));
 
   removeAll({}).then(function(){
     res.redirect('/');

@@ -17,6 +17,8 @@
 
 module.exports = function (app) {
   app.use('/celebrities', require('./celebrities'));
+  app.use('/analyze', require('./hashtag'));
+  app.use('/data', require('./data'));
   app.use('/', require('./user'));
 
   app.use('/tos', function(req, res) {

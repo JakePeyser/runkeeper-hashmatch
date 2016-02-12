@@ -39,7 +39,7 @@ function TwitterHelper(configs) {
 TwitterHelper.prototype.getInstance = function() {
   var instance = this.count % this.twit.length;
   this.count ++;
-
+  //console.log(this.twit);
   console.log('instance', instance);
   return this.twit[instance];
 };
@@ -56,13 +56,13 @@ var englishAndNoRetweet = function(tweet) {
  * Implemented with recursive calls that fetch up to 200 tweets in every call
  * Only returns english and original tweets (no retweets)
  */
-TwitterHelper.prototype.getTweets = function(screen_name, callback) {
-  console.log('getTweets for:', screen_name);
+TwitterHelper.prototype.getTweets = function(inputs, callback) {
+  console.log('getTweets for:', inputs.screen_name);
 
   var self = this,
     tweets = [],
     params = {
-      screen_name: screen_name,
+      screen_name: inputs.screen_name,
       count: MAX_COUNT,
       exclude_replies: true,
       trim_user:true};
@@ -76,9 +76,12 @@ TwitterHelper.prototype.getTweets = function(screen_name, callback) {
     .filter(englishAndNoRetweet)
     .map(Formatter.toContentItem);
 
+    // Concatenate tweets and calculate if done
     tweets = tweets.concat(items);
-    console.log(screen_name,'_tweets.count:',tweets.length);
-    if (_tweets.length > 1) {
+    console.log(inputs.screen_name,'_tweets.count:',tweets.length);
+    var done = (inputs.limit && tweets.length >= inputs.limit) ? true : false;
+
+    if (_tweets.length > 1 && !done) {
       params.max_id = _tweets[_tweets.length-1].id - 1;
       self.getInstance().getUserTimeline(params, processTweets);
     } else {
@@ -94,7 +97,6 @@ TwitterHelper.prototype.getTweets = function(screen_name, callback) {
  */
 TwitterHelper.prototype.getUsers = function(params, callback) {
   console.log('getUsers:', params);
-
   this.getInstance().post('/users/lookup.json',params,function(tw_users) {
     if (tw_users.statusCode){
       console.log('error getting the twitter users');
@@ -114,6 +116,21 @@ TwitterHelper.prototype.showUser = function(screen_name, callback) {
       callback(user);
     } else
       callback(null, Formatter.toAppUser(user));
+  });
+};
+
+/**
+ * Searches for recent tweets using input query
+ * It looks at query to determinate what to search for
+ */
+TwitterHelper.prototype.searchTweets = function(query, params, callback) {
+  console.log('search:', query);
+  this.getInstance().search(query, params, function(tw_tweets) {
+    if (tw_tweets.statusCode){
+      console.log('error searching for tweets');
+      callback(tw_tweets);
+    } else
+      callback(null, tw_tweets.statuses.map(Formatter.toTweet.bind(Formatter)));
   });
 };
 

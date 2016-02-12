@@ -29,6 +29,7 @@ var express     = require('express'),
 // Load Mongoose Schemas
 require('./app/models/profile');
 require('./app/models/user');
+require('./app/models/hashtag');
 
 // Mongoose by default sets the auto_reconnect option to true.
 // Recommended a 30 second connection timeout because it allows for
@@ -57,6 +58,7 @@ var twit = new TwitterHelper(config.twitter);
 var personality_insights = new watson.personality_insights(config.personality_insights);
 
 // Make the services accessible to the router
+app.set('json spaces', 2);
 app.use(function(req,res,next){
   req.twit = twit;
   req.personality_insights = personality_insights;

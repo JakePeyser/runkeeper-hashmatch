@@ -19,14 +19,14 @@ var mongoose = require('mongoose'),
   extend = require('extend');
 
 var UserSchema = mongoose.Schema({
-  name:      String,
-  username:  String,
-  profile:   String,
-  followers: Number,
-  tweets:    Number,
-  id:        String,
-  image:     String,
-  updated:   { type: Date, default: Date.now }
+  name:         String,
+  username:     String,
+  personality:  String,
+  followers:    Number,
+  tweets:       Number,
+  id:           String,
+  image:        String,
+  updated:      { type: Date, default: Date.now }
 });
 
 // Create a new user or update the existing one
@@ -37,24 +37,39 @@ UserSchema.statics.createOrUpdate = function(profile, done){
 
   // Search for a profile from the given auth origin
   User.findOne(query, function(err, user){
-      if(err) return done(err);
-      if(user) {
-        extend(user,profile);
-        user.save(function(err, user){
+    if(err) return done(err);
+    if(user) {
+      extend(user,profile);
+      user.save(function(err, user){
+        if(err) return done(err);
+        done(null, user);
+      });
+    } else {
+      // New user, create
+      User.create(
+        extend({},profile),
+        function(err, user){
           if(err) return done(err);
           done(null, user);
-        });
-      } else {
-        // New user, create
-        User.create(
-          extend({},profile),
-          function(err, user){
-            if(err) return done(err);
-            done(null, user);
-          }
-        );
-      }
-    });
+        }
+      );
+    }
+  });
+};
+
+// Check if the user of a tweet exists in the DB
+UserSchema.statics.checkExistence = function(inputUser, done){
+  var User = this;
+  // Build dynamic key query
+  var query = { id: inputUser.id };
+
+  // Search for a profile from the given auth origin
+  User.findOne(query, function(err, user){
+    if(err) return done(err);
+    if(user) inputUser.exists = true;
+    else inputUser.exists = false;
+    return done(null, inputUser);
+  });
 };
 
 module.exports = mongoose.model('User', UserSchema);
