@@ -9,11 +9,13 @@ block content
       .col-md-8.col-md-push-2
         .img-container.main-logo
           img(src='/images/logo-lg.svg')
+          span.logo-plus +
+          img(src='/images/runkeeper-logo.svg')
 
     .row.sub-text
       .col-md-12
         h4
-          | Enter your Twitter handle to see which celebrities have the most similar (and different) personalities to yours!
+          | Enter your Twitter handle to see which running hashtags have the most similar (and different) personalities to yours!
     form(method='post', action='/')
       .row.twitter-submission
         .col-md-12
@@ -40,12 +42,15 @@ block content
     .row.extra-links
       .col-md-12
         p.text-center
-          a(href='https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/') Built with IBM Watson
+          span Built with&nbsp;
+          a(href='https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/') IBM Watson
+          span &nbsp;and&nbsp;
+          a(href='http://ibm.biz/runkeeper-hashmatch-bluemix') Bluemix
     .row.extra-links
       .col-md-12
         p.text-center
           a(href='/tos') Terms of use
-          |  | 
+          |&nbsp;|&nbsp;
           a(href='https://www.ibm.com/privacy/us/en/') Privacy Policy
 
     - var styles = ['left: 2rem; top: 1rem; width: 2rem; height: 2rem;']

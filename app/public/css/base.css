@@ -80,18 +80,37 @@ button.button, a.button {
 .top-nav {
   width: 100%;
   display: block;
-  background-color: #231f20;
+  background-color: #152934;
   padding: 2px 0px 3px;
   position: relative;
   z-index: 15;
 }
 .top-nav .app-icon {
-  margin: 0px auto;
+  display: inline-flex;
+  padding-left: 5%;
   width: 210px;
   height: 36px;
 }
-.top-nav .app-icon img {
-  width: 100%;
+.top-nav .app-icon a {
+  display: inline-flex;
+  text-decoration: none;
+}
+.top-nav .app-icon a p {
+  text-decoration: none;
+  font-size: 1.6rem;
+  color: white;
+}
+.top-nav .app-icon a p:hover {
+  color: white;
+}
+.bluemix-logo-sm {
+  margin-right: 10px;
+  width: 20%;
+  height: 100%;
+}
+.runkeeper-logo-sm {
+  margin-left: 8px;
+  width: 24%;
   height: 100%;
 }
 .top-nav .home-link {
@@ -100,10 +119,10 @@ button.button, a.button {
   top: 9px;
 }
 .top-nav .home-link a {
-  color: #bbbdbf;
+  color: white;
 }
 .top-nav .home-link a:hover {
-  color: #eee;
+  color: #5596e6;
 }
 
 /**

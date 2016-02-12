@@ -2,8 +2,8 @@ html, body {
   overflow-x: hidden;
 }
 body {
-  background-color: #231f20;
-  color: #d0d2d3;
+  background-color: #152934;
+  color: white;
   max-height: 100%;
 }
 
@@ -12,10 +12,10 @@ form {
 }
 
 a, a:link, a:visited {
-  color: #929497;
+  color: white;
 }
 a:hover, a:focus {
-  color: #D0D2D3;
+  color: #5596e6;
 }
 
 #wrap {
@@ -23,26 +23,37 @@ a:hover, a:focus {
 }
 
 .container {
-  padding-top: 5rem;
+  padding-top: 3rem;
 }
 
 .sub-text {
   font-weight: 600;
 }
 
-.img-container img {
-  width: 100%;
-  height: auto;
+.img-container.main-logo {
+  text-align: center;
 }
 
-.img-container.main-logo {
-  width: 100%;
+.img-container.main-logo img {
+  width: 25%;
+  height: 30%;
+}
+
+.logo-plus {
+  margin-left: 10px;
+  font-size: 4rem;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+.sub-text {
+  padding-top: 16px;
 }
 
 .sub-text h4 {
   text-align: center;
   width: 100%;
-  max-width: 27rem;
+  max-width: 30rem;
   margin: 0px auto;
 }
 
@@ -143,6 +154,11 @@ a:hover, a:focus {
   -moz-transition: .4s;
   -o-transition: .4s;
   transition: .4s;
+}
+
+.celeb-img img {
+  width: 100%;
+  height: auto;
 }
 
 
