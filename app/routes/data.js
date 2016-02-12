@@ -36,15 +36,23 @@ router.get('/celebs', function(req,res) {
   });
 });
 
-router.post('/celebs/', function(req, res) {
+router.post('/celebs/id/', function(req, res) {
   var id = req.body.id;
   if (id && id.substr(0,1) !== '@') {
     id = '@' + id;
   }
-  res.redirect(id ? '/celebs/' + id : '/');
+  res.redirect(id ? '/celebs/id/' + id : '/');
 });
 
-router.get('/celebs/@:id', function(req,res) {
+router.post('/celebs/hashtag/', function(req, res) {
+  var hashtag = req.body.hashtag;
+  if (hashtag && hashtag.substr(0,1) !== '@') {
+    hashtag = '@' + hashtag;
+  }
+  res.redirect(hashtag ? '/celebs/hashtag/' + hashtag : '/');
+});
+
+router.get('/celebs/id/@:id', function(req,res) {
   var id = req.params.id;
   Profile.findOne({id:id},function(err,profile){
     if (err)
@@ -56,8 +64,24 @@ router.get('/celebs/@:id', function(req,res) {
   });
 });
 
-router.get('/celebs/:id', function(req, res) {
-  res.redirect('/data/celebs/@' + req.params.id);
+router.get('/celebs/hashtag/@:hashtag', function(req,res) {
+  var hashtag = req.params.hashtag;
+  Profile.find({hashtag:hashtag},function(err,profiles){
+    if (err)
+      res.json({error: err});
+    else if (!profiles || !profiles.length)
+      res.json({found: false});
+    else
+      res.json({found: true, profiles: profiles});
+  });
+});
+
+router.get('/celebs/id/:id', function(req, res) {
+  res.redirect('/data/celebs/id/@' + req.params.id);
+});
+
+router.get('/celebs/hashtag/:hashtag', function(req, res) {
+  res.redirect('/data/celebs/hashtag/@' + req.params.hashtag);
 });
 
 //=====USERS====================================================================
@@ -74,15 +98,15 @@ router.get('/users', function(req,res) {
   });
 });
 
-router.post('/users/', function(req, res) {
+router.post('/users/id/', function(req, res) {
   var id = req.body.id;
   if (id && id.substr(0,1) !== '@') {
     id = '@' + id;
   }
-  res.redirect(id ? '/users/' + id : '/');
+  res.redirect(id ? '/users/id/' + id : '/');
 });
 
-router.get('/users/@:id', function(req,res) {
+router.get('/users/id/@:id', function(req,res) {
   var id = req.params.id;
   User.findOne({id:id},function(err,user){
     if (err)
@@ -94,8 +118,8 @@ router.get('/users/@:id', function(req,res) {
   });
 });
 
-router.get('/users/:id', function(req, res) {
-  res.redirect('/data/users/@' + req.params.id);
+router.get('/users/id/:id', function(req, res) {
+  res.redirect('/data/users/id/@' + req.params.id);
 });
 
 //=====HASHTAGS=================================================================
@@ -112,15 +136,15 @@ router.get('/hashtags', function(req,res) {
   });
 });
 
-router.post('/hashtags/', function(req, res) {
+router.post('/hashtags/hashtag/', function(req, res) {
   var hashtag = req.body.hashtag;
   if (hashtag && hashtag.substr(0,1) !== '@') {
     hashtag = '@' + hashtag;
   }
-  res.redirect(hashtag ? '/hashtags/' + hashtag : '/');
+  res.redirect(hashtag ? '/hashtags/hashtag/' + hashtag : '/');
 });
 
-router.get('/hashtags/@:hashtag', function(req,res) {
+router.get('/hashtags/hashtag/@:hashtag', function(req,res) {
   var hashtag = req.params.hashtag;
   Hashtag.findOne({hashtag:hashtag},function(err,hashtag){
     if (err)
@@ -132,8 +156,8 @@ router.get('/hashtags/@:hashtag', function(req,res) {
   });
 });
 
-router.get('/hashtags/:hashtag', function(req, res) {
-  res.redirect('/data/hashtags/@' + req.params.hashtag);
+router.get('/hashtags/hashtag/:hashtag', function(req, res) {
+  res.redirect('/data/hashtags/hashtag/@' + req.params.hashtag);
 });
 
 module.exports = router;

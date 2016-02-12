@@ -37,7 +37,7 @@ var pics = [],
     getCelebrityFromDB = Q.denodeify(Profile.find.bind(Profile)),
     saveHashtagInDB = Q.denodeify(Hashtag.createOrUpdate.bind(Hashtag));
 
-var MAX_COUNT = 100;
+var MAX_COUNT = 20;
 
 /**
  * Updates an array with the celebrity profile pictures.
@@ -131,19 +131,26 @@ var getUniqueUsers = function(searchTweets, hashtag, cb) {
   });
 }
 
-router.post('/', function(req, res) {
+router.post('/twitter/', function(req, res) {
   var hashtag = req.body.hashtag;
   if (hashtag && hashtag.substr(0,1) !== '@') {
     hashtag = '@' + hashtag;
   }
-  res.redirect(hashtag ? '/analyze/' + hashtag : '/');
+  res.redirect(hashtag ? '/analyze/twitter/' + hashtag : '/');
+});
+
+router.post('/personality/', function(req, res) {
+  var hashtag = req.body.hashtag;
+  if (hashtag && hashtag.substr(0,1) !== '@') {
+    hashtag = '@' + hashtag;
+  }
+  res.redirect(hashtag ? '/analyze/personality/' + hashtag : '/');
 });
 
 /**
- * Retrieve users who use a hashtag, retrieve their tweets,
- * and run them all through personality insights
+ * Retrieve 20 users who use a hashtag and retrieve their tweets
 */
-router.get('/@:hashtag', function (req, res) {
+router.get('/twitter/@:hashtag', function (req, res) {
   var hashtag = req.params.hashtag;
   if (!hashtag)
     return res.render('index', {info: 'You need to provide a hashtag.'});
@@ -158,71 +165,105 @@ router.get('/@:hashtag', function (req, res) {
     var usersArray = userMap.values();
     var promises = [];
     for (var i=0; i < usersArray.length; i++) {
-      if (i==0 || i==1 || i==3)
-        promises.push(getTweets({screen_name:usersArray[i].username,limit:200}));
+      promises.push(getTweets({screen_name:usersArray[i].username,limit:200}));
     }
 
     // Retrieve each user's tweet history
     Q.all(promises)
     .then(function(userTweets) {
+      promises = [];
       var user,
         hashPic,
         hashTweets = [],
         saveProfilePromises = [];
 
-      // Concatenate all retrieved tweets from users
+      // Grab each users tweets and associate with user object
       userTweets.forEach(function(tweets){
         user = userMap.get(tweets[0].userid.toString())
-        if (!hashPic) hashPic = user.image;
         console.log(user.username, 'has', tweets.length, 'tweets');
-        hashTweets = hashTweets.concat(tweets);
 
         // Grab additional fields and store in future promise
         user.hashtag = hashtag;
         user.tweetlog = JSON.stringify(tweets);
-        saveProfilePromises.push(saveProfileInDB(user));
+        promises.push(saveProfileInDB(user));
       });
 
-      // Make userid the same for all tweets so personality insights works
-      hashTweets.forEach(function(tweet) {
-        tweet.userid = 12345678;
+      // Retrieve each user's tweet history
+      Q.all(promises)
+      .then(function(users) {
+        console.log ('Users for #' + hashtag, 'saved to DB');
       });
-
-      // Retrieves the personality profile using all tweets as input
-      return getProfile({contentItems:hashTweets})
-        .then(function(personality) {
-          console.log(personality);
-          if (!personality)
-            return;
-          console.log('#' + hashtag, 'analyzed with personality insights');
-          var hashtagObject = {
-            hashtag: hashtag,
-            users: userMap.count(),
-            image: hashPic,
-            personality: JSON.stringify(personality)
-          }
-
-          // Save hashtag in database with the personality
-          console.log('#' + hashtag, 'added to the database');
-          return saveHashtagInDB(hashtagObject)
-            .then(function(savedHashtag) {
-
-              // Save profiles used for the hashtag to the database
-              Q.all(saveProfilePromises)
-              .then(function(savedProfiles) {
-                console.log('All profiles for #' + hashtag, 'saved to the database');
-              });
-            });
-        });
     });
   });
 
   updateBackground();
-  res.render('index', {info: 'Analyzing #' + hashtag, pics:pics});
+  res.render('index', {info: 'Retrieving #' + hashtag + ' users', pics:pics});
 });
 
-router.get('/:hashtag', function(req, res) {
-  res.redirect('/analyze/@' + req.params.hashtag);
+/**
+ * Run users tweets stored in DB for hashtag through personality insights
+*/
+router.get('/personality/@:hashtag', function (req, res) {
+  var hashtag = req.params.hashtag;
+  if (!hashtag)
+    return res.render('index', {info: 'You need to provide a hashtag.'});
+
+  updateBackground();
+  Profile.find({hashtag:hashtag}, function(err, profiles) {
+  if (err) {
+    console.log(err)
+    console.log('Error retrieving #' + hashtag, 'users');
+  }
+  else if (!profiles)
+    console.log('No #' + hashtag, 'users found in database')
+  else
+    var hashTweets = [],
+      hashPic;
+
+    // Concatenate all tweets into a single array
+    profiles.forEach(function(profile){
+      if (!hashPic) hashPic = profile.image;
+      hashTweets = hashTweets.concat(JSON.parse(profile.tweetlog));
+    });
+
+    // Make userid the same for all tweets so personality insights works
+    hashTweets.forEach(function(tweet) {
+      tweet.userid = 12345678;
+    });
+
+    // Declare promise to handle personality_insights req
+    var getProfile = Q.denodeify(req.personality_insights.profile.bind(req.personality_insights));
+    return getProfile({contentItems:hashTweets})
+    .then(function(personality) {
+      if (!personality)
+        console.log("Error analyzing personality for #" + hashtag);
+      console.log('#' + hashtag, 'analyzed with personality insights');
+      var hashtagObject = {
+        hashtag: hashtag,
+        users: profiles.length,
+        image: hashPic,
+        personality: JSON.stringify(personality)
+      }
+
+      // Save hashtag in database with the personality
+      return saveHashtagInDB(hashtagObject)
+      .then(function(savedHashtag) {
+        if (!savedHashtag)
+          console.log("Error saving #" + hashtag);
+        console.log('#' + hashtag, 'saved to the database');
+      });
+    });
+  });
+
+  res.render('index', {info: 'Analyzing personality of #' + hashtag + ' users', pics:pics});
+});
+
+router.get('twitter/:hashtag', function(req, res) {
+  res.redirect('/analyze/twitter/@' + req.params.hashtag);
+});
+
+router.get('personality/:hashtag', function(req, res) {
+  res.redirect('/analyze/personality/@' + req.params.hashtag);
 });
 
 module.exports = router;
