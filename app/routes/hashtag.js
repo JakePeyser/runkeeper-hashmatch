@@ -162,6 +162,9 @@ router.get('/twitter/@:hashtag', function (req, res) {
 
   // Retrieve unique users who have recently tweeted with the input hashtag
   getUniqueUsers(searchTweets, hashtag, function(userMap) {
+    if (!userMap.count())
+      return;
+
     var usersArray = userMap.values();
     var promises = [];
     for (var i=0; i < usersArray.length; i++) {
@@ -213,9 +216,12 @@ router.get('/personality/@:hashtag', function (req, res) {
   if (err) {
     console.log(err)
     console.log('Error retrieving #' + hashtag, 'users');
+    return;
   }
-  else if (!profiles)
-    console.log('No #' + hashtag, 'users found in database')
+  else if (!profiles || !profiles.length) {
+    console.log('No #' + hashtag, 'users found in database');
+    return;
+  }
   else
     var hashTweets = [],
       hashPic;

@@ -29,8 +29,8 @@ var router   = require('express').Router(),
 var pics = [];
 var celebs = [];
 var hashtags = [];
-var getCelebrityFromDB = Q.denodeify(Profile.find.bind(Profile));
-var getHashtagFromDB = Q.denodeify(Hashtag.find.bind(Hashtag));
+var getCelebrityFromDB = Q.denodeify(Profile.find.bind(Profile)),
+  getHashtagsFromDB = Q.denodeify(Hashtag.find.bind(Hashtag));
 
 /**
  * Updates an array with the celebrity profile pictures.
@@ -103,7 +103,8 @@ router.get('/like/@:username', function (req, res) {
     getTweets  = Q.denodeify(req.twit.getTweets.bind(req.twit)),
     getProfile = Q.denodeify(req.personality_insights.profile.bind(req.personality_insights)),
     getUserFromDB = Q.denodeify(User.findOne.bind(User)),
-    saveUserInDB = Q.denodeify(User.createOrUpdate.bind(User));
+    saveUserInDB = Q.denodeify(User.createOrUpdate.bind(User)),
+    getHashTagsFromDB = Q.denodeify(Hashtag.find.bind(Hashtag));
 
   showUser(username)
   .then(function(user) {
@@ -113,17 +114,17 @@ router.get('/like/@:username', function (req, res) {
       return;
     else if (user.protected)
       return res.render('index',
-        { info: '@'+username+' is protected, try another one.', pics: pics});
+        { info: '@' + username + ' is protected, try another one.', pics: pics});
 
     return getCelebrityFromDB({id:user.id})
     .then(function(celebrity){
       if (celebrity && celebrity.length === 0) {
-        console.log(user.username,'is not a celebrity, lets see if is in the DB');
+        console.log(user.username, 'is not a runner, lets see if they are in the database');
         return getUserFromDB({id:user.id})
         .then(function(dbUser) {
           if (dbUser) {
             console.log(username, 'found in the database');
-            return extend(dbUser,user);
+            return extend(dbUser, user);
           }
           else {
             console.log(username, 'is a new user, lets get their tweets');
@@ -138,8 +139,7 @@ router.get('/like/@:username', function (req, res) {
                     return;
                   console.log(username, 'analyze with personality insights');
 
-                  console.log(username, 'added to the database');
-                  user.profile = JSON.stringify(profile);
+                  user.personality = JSON.stringify(profile);
                   return saveUserInDB(user);
                 });
               });
@@ -152,11 +152,14 @@ router.get('/like/@:username', function (req, res) {
     })
     .then(function(dbUser) {
       if (!dbUser) return;
+      console.log(dbUser.name, 'added to the database');
 
-      getHashtagFromDB({}).then(function(returnedHashes) {
-        hashtags = returnedHashes;
-        console.log(dbUser.username,'to be compared to:',hashtags.length,'hashtags');
+      // Retrieve hashtags and their personality from the DB
+      return getHashtagsFromDB({})
+      .then(function(hashtags) {
+        console.log(dbUser.username,' to be compared to', hashtags.length, 'hashtags');
         var distances = util.calculateDistances(dbUser, hashtags);
+
         // Remove celebrities to match to themselves
         if (distances[0].distance === 1.00)
           distances = distances.slice(1);
@@ -165,10 +168,11 @@ router.get('/like/@:username', function (req, res) {
           user: dbUser,
           user_profile: flatten.traits(dbUser.personality, 0),
           // return only the 6 most similar/different profiles
-          similar_celebs: distances.slice(0, Math.min(6, distances.length)),
-          different_celebs: distances.reverse().slice(0, Math.min(6, distances.length)),
+          similar_hashtags: distances.slice(0, Math.min(6, distances.length)),
+          different_hashtags: distances.reverse().slice(0, Math.min(6, distances.length)),
           pics: pics
         };
+
         // Check if the results could be inacurrate because of the number of tweets
         if (dbUser.tweets < 200)
           ret.info = 'The more tweets you have, the more accurate your results'+
@@ -200,8 +204,9 @@ router.get('/like/@:username', function (req, res) {
     // return null because we already fulfill the response
     return null;
 
-  }).done(function(result){
-    console.log('done()');
+  })
+  .done(function(result){
+    console.log('matching process complete');
     if (result)
       res.render('match', result);
   });
@@ -209,46 +214,6 @@ router.get('/like/@:username', function (req, res) {
 
 router.get('/like/:username', function(req, res) {
   res.redirect('/like/@' + req.params.username);
-});
-
-
-router.get('/resetUsers', function (req, res) {
-  console.log('remove users from database');
-  var removeAll = Q.denodeify(User.remove.bind(User));
-
-  removeAll({}).then(function(){
-    res.redirect('/');
-  })
-  .catch(function (error) {
-    console.log('error', error);
-    res.redirect('/');
-  });
-});
-
-router.get('/resetProfiles', function (req, res) {
-  console.log('remove profiles from database');
-  var removeAll = Q.denodeify(Profile.remove.bind(Profile));
-
-  removeAll({}).then(function(){
-    res.redirect('/');
-  })
-  .catch(function (error) {
-    console.log('error', error);
-    res.redirect('/');
-  });
-});
-
-router.get('/resetHashtags', function (req, res) {
-  console.log('remove hashtags from database');
-  var removeAll = Q.denodeify(Hashtag.remove.bind(Hashtag));
-
-  removeAll({}).then(function(){
-    res.redirect('/');
-  })
-  .catch(function (error) {
-    console.log('error', error);
-    res.redirect('/');
-  });
 });
 
 module.exports = router;

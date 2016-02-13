@@ -17,40 +17,40 @@
 'use strict';
 
 /**
- * Display a celebrity and its traits
- * @param  {Object} celebrity the object with the twitter user,
+ * Display a hashtag and its traits
+ * @param  {Object} hashtag the object with the twitter user,
  * profile and distance
  */
-function displayCelebrity(celebrity) {
-  $('.cel_name').text(celebrity.user.name);
-  $('.cel_username').text('@' + celebrity.user.username);
-  $('.cel_username').attr('href', 'https://twitter.com/' + celebrity.user.username);
-  $('.cel_distance').text(Math.round(celebrity.distance * 100) + '%');
-  $('.cel_image').attr('src', celebrity.user.image.replace('_normal', '_400x400'));
+function displayHashtag(hashtag) {
+  $('.cel_name').text('#' + hashtag.hash.hashtag);
+  $('.cel_username').text('#' + hashtag.hash.hashtag);
+  $('.cel_username').attr('href', 'https://twitter.com/search?q=%23' + hashtag.hash.hashtag);
+  $('.cel_distance').text(Math.round(hashtag.distance * 100) + '%');
+  $('.cel_image').attr('src', hashtag.hash.image.replace('_normal', '_400x400'));
 
   // Big 5
-  celebrity.profile.forEach(function(trait, i) {
+  hashtag.profile.forEach(function(trait, i) {
     $('#trait_' + i).css('left', 'calc(' + (trait.value * 100) + '%)');
   });
 }
 
 /**
- * On click handler for celebrity images.
- * Get the celebrity id and call displayCelebrity if it exists
+ * On click handler for hashtag images.
+ * Get the hashtag id and call displayHashtag if it exists
  * @param  {Object} e event
  */
 $('.avatar-small').click(function(e) {
-  var celebrity;
+  var hashtag;
   var id = $(this).find('img').prop('id');
   if (id.match('^s_'))
-    celebrity = similar_celebs[id.slice(2)];
+    hashtag = similar_hashtags[id.slice(2)];
   else
-    celebrity = different_celebs[id.slice(2)];
+    hashtag = different_hashtags[id.slice(2)];
 
-  if (celebrity)
-    displayCelebrity(celebrity);
+  if (hashtag)
+    displayHashtag(hashtag);
   else
-    console.log('celebrity not found!');
+    console.log('hashtag not found!');
 
 });
 
@@ -77,7 +77,7 @@ $(document).on('click', '.button.back', function() {
 });
 
 /**
- * On hover handler for making user's points bigger and celeb's points smaller
+ * On hover handler for making user's points bigger and hashtag's points smaller
  */
 $(document).on('mouseenter', '.avatars-row > .me', function() {
   $('.mep').addClass('bigger');
@@ -89,7 +89,7 @@ $(document).on('mouseleave', '.avatars-row > .me', function() {
 });
 
 /**
- * On hover handler for making celeb's points bigger and user's points smaller
+ * On hover handler for making hashtag's points bigger and user's points smaller
  */
 $(document).on('mouseenter', '.avatars-row > .celebrity', function() {
   $('.mep').addClass('smaller');
@@ -113,5 +113,5 @@ $('.page-content img').on('load', function() {
 });
 
 $(document).ready(function() {
-  displayCelebrity(similar_celebs[0]);
+  displayHashtag(similar_hashtags[0]);
 });

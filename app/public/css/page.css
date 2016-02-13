@@ -19,7 +19,6 @@
 .panel-main {
   padding: .9375rem;
   border: 1px solid #e6e7e8;
-  border-radius: 8px;
 }
 
 .overlay-screen {
@@ -86,7 +85,7 @@
 .avatar .third-border {
   border-width: 10px;
   border-style: solid;
-  border-color: #1cc665;
+  border-color: #8cd211;
 }
 
 .avatar {
@@ -120,7 +119,7 @@
   box-shadow: 0px 0px 11px rgba(51, 51, 51, 0.45);
 }
 .similarity h1 {
-  color: #eabf0a;
+  color: #efc100;
 }
 .similarity .left-bar, .similarity .right-bar {
   width: 250px;
@@ -132,11 +131,11 @@
 }
 .similarity .right-bar {
   right: 50%;
-  background-color: #1cc665;
+  background-color: #8cd211;
 }
 .similarity .left-bar {
   left: 50%;
-  background-color: #0098ff;
+  background-color: #5aaafa;
 }
 .similarity .right-bar div, .similarity .left-bar div {
   height: calc(50% + 1px);
@@ -148,7 +147,7 @@
   margin-top: 3px;
 }
 .similar-to span {
-  color: #0098ff;
+  color: #5aaafa;
 }
 
 .me,
@@ -156,8 +155,8 @@
 .me .third-border,
 .me .avatar-name,
 .me .avatar-name a {
-  color: #1cc665;
-  border-color: #1cc665;
+  color: #8cd211;
+  border-color: #8cd211;
   text-decoration: none;
 }
 .me .avatar-name a:hover {
@@ -172,8 +171,8 @@
 .celebrity .third-border,
 .celebrity .avatar-name,
 .celebrity .avatar-name a {
-  color: #0098ff;
-  border-color: #0098ff;
+  color: #5aaafa;
+  border-color: #5aaafa;
   text-decoration: none;
 }
 .celebrity .avatar-name a:hover {
@@ -214,33 +213,33 @@
   width: 100%;
   height: 100%;
 }
-.avatar-small .overlay-yellow,
+.avatar-small .overlay-green,
 .avatar-small .overlay-red {
   height: 100%;
   position: absolute;
   width: 100%;
   top: 0px;
 }
-.avatar-small .overlay-yellow {
-  background-color: rgba(234, 191, 10, 0.52);
+.avatar-small .overlay-green {
+  background-color: rgba(0, 180, 160, 0.52);
   -webkit-transition: .3s;
   -moz-transition: .3s;
   -o-transition: .3s;
   transition: .3s;
 }
 .avatar-small .overlay-red {
-  background-color: rgba(240, 78, 55, 0.52);
+  background-color: rgba(255, 80, 80, 0.52);
   -webkit-transition: .3s;
   -moz-transition: .3s;
   -o-transition: .3s;
   transition: .3s;
 }
-.avatar-small .overlay-yellow:hover,
+.avatar-small .overlay-green:hover,
 .avatar-small .overlay-red:hover {
   background-color: rgba(0, 64, 65, 1);
 }
-.avatar-small .overlay-yellow:active {
-  /*background-color: rgba(234, 191, 10, 1);*/
+.avatar-small .overlay-green:active {
+  /*background-color: rgba(0, 180, 160, 1);*/
   background-color: rgba(0, 152, 255, 1);
   -webkit-transition: 0s;
   -moz-transition: 0s;
@@ -251,7 +250,7 @@
   text-shadow: none;
 }
 .avatar-small .overlay-red:active {
-  /*background-color: rgba(240, 78, 55, 1);*/
+  /*background-color: rgba(255, 80, 80, 1);*/
   background-color: rgba(0, 152, 255, 1);
   -webkit-transition: 0s;
   -moz-transition: 0s;
@@ -294,7 +293,7 @@
   width: 1.25rem;
   height: 1.25rem;
   margin-left: -.625rem;
-  background-color: #1cc665;
+  background-color: #8cd211;
   border-radius: 50%;
   display: inline-block;
   position: absolute;
@@ -307,11 +306,11 @@
 }
 .mep {
   /* border-color is inherited from .me's color */
-  background-color: #1cc665;
+  background-color: #8cd211;
 }
 
 .celebrityp {
-  background-color: #0098ff;
+  background-color: #5aaafa;
 }
 
 .bigger {
@@ -427,14 +426,15 @@ a.tlink {
 }
 
 .panel-comparisons {
-  border: 1px solid #a6a8ab;
-  border-radius: 8px;
+  border: 1px solid #152934;
 }
 .panel-comparisons .panel-body {
   padding: 1.6875rem .9375rem 0rem;
 }
 .panel-heading {
-  background-color: #404041;
+  background-color: #152934;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
 }
 .panel-heading p {
   color: #f1f1f2;
@@ -442,10 +442,10 @@ a.tlink {
 }
 
 .most-similar .panel-heading p span {
-  color: #eabf0a;
+  color: #00b4a0;
 }
 .most-different .panel-heading p span {
-  color: #f04e37;
+  color: #ff5050;
 }
 
 @media screen and (max-width: 992px) {

@@ -32,7 +32,20 @@ router.get('/celebs', function(req,res) {
     if (err)
       res.json({error: err});
     else
-      res.json({profiles: profiles});
+      res.json({count:profiles.length, profiles: profiles});
+  });
+});
+
+router.get('/celebs/reset', function(req,res) {
+  console.log('removing profiles from database');
+  var removeAll = Q.denodeify(Profile.remove.bind(Profile));
+
+  removeAll({}).then(function(){
+    res.redirect('/');
+  })
+  .catch(function (error) {
+    console.log('error', error);
+    res.redirect('/');
   });
 });
 
@@ -72,7 +85,7 @@ router.get('/celebs/hashtag/@:hashtag', function(req,res) {
     else if (!profiles || !profiles.length)
       res.json({found: false});
     else
-      res.json({found: true, profiles: profiles});
+      res.json({found: true, count:profiles.length,  profiles: profiles});
   });
 });
 
@@ -94,7 +107,20 @@ router.get('/users', function(req,res) {
     if (err)
       res.json({error: err});
     else
-      res.json({users: users});
+      res.json({count:users.length, users: users});
+  });
+});
+
+router.get('/users/reset', function(req,res) {
+  console.log('removing users from database');
+  var removeAll = Q.denodeify(User.remove.bind(User));
+
+  removeAll({}).then(function(){
+    res.redirect('/');
+  })
+  .catch(function (error) {
+    console.log('error', error);
+    res.redirect('/');
   });
 });
 
@@ -132,7 +158,20 @@ router.get('/hashtags', function(req,res) {
     if (err)
       res.json({error: err});
     else
-      res.json({hashtags: hashtags});
+      res.json({count:hashtags.length, hashtags: hashtags});
+  });
+});
+
+router.get('/hashtags/reset', function(req,res) {
+  console.log('removing hashtags from database');
+  var removeAll = Q.denodeify(Hashtag.remove.bind(Hashtag));
+
+  removeAll({}).then(function(){
+    res.redirect('/');
+  })
+  .catch(function (error) {
+    console.log('error', error);
+    res.redirect('/');
   });
 });
 

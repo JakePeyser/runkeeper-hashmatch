@@ -95,7 +95,7 @@ module.exports = {
       var ret = {
         hash: hashtag,
         distance: similarity(user.personality, hashtag.personality, 0),
-        profile: flatten.traits(celebrity.personality, 0)
+        profile: flatten.traits(hashtag.personality, 0)
       };
       return ret;
     }).sort(profileSort);

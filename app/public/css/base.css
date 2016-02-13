@@ -126,6 +126,15 @@ button.button, a.button {
 }
 
 /**
+* Alert Styles
+*/
+.alert-info {
+  color: white;
+  background-color: #7cc7ff;
+  border-color: #5aaafa;
+}
+
+/**
 * Footer Styles
 */
 body {height: 100%;}
