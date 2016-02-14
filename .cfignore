@@ -1,2 +1,7 @@
-node_modules
-.DS_Store
+*.log
+node_modules/
+.DS_STORE
+README.md
+vcap-local.json
+.gitignore
+.gitattributes
