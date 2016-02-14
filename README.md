@@ -1,140 +1,184 @@
-# your-celebrity-match
+# runkeeper-hashmatch Overview
 
-The application uses IBM Watson [Personality Insights][pi_docs] and Twitter to find the celebrities that are similar to your personality. Twitter is being use to get the tweets for a given handler, the text from those tweets is send to Personality Insights, who analyze the text and reply with a personality profile. That profile is compared to celebrity profiles to find the most similar.
+Runkeeper Hashmatch uses the IBM Watson [Personality Insights service][pi_docs] and [Twitter][twitter_url] to match you with the users who tweet using a popular running hashtag. Twitter is used to get the tweets for a given Twitter handle, the text from those tweets is sent to Personality Insights, which analyzes the text and replies with a personality profile. That profile is compared to against aggregated personality profiles of the users who tweet using specific running hashtags
+  
+[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy)
 
-Live demo: http://your-celebrity-match.mybluemix.net/
+**Note**: If you deploy the application in Bluemix using the above button, you will need to complete steps 9-14 below to finish the setup process.
 
-Give it a try! Click the button below to fork into IBM DevOps Services and deploy your own copy of this application on Bluemix.  
-[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/watson-developer-cloud/yourcelebritymatch)  
-**Note**: Once you deploy the application in Bluemix you will need to do some extra steps described below to setup the database and Twitter API credentials.
+## Running the app on Bluemix
 
-# How it works
+1. If you do not already have a Bluemix account, [sign up here][bluemix_signup_url]
 
-Steps | 
-:------------: |
-<img src="http://s7.postimg.org/odqyly6vv/1_enter_handle.gif" alt="You input your Twitter handle" width="100px" height="100px"><br>You input your Twitter handle.<br> |
-<img src="http://s7.postimg.org/ag8sgn8t7/2_twitter_feed.gif" alt="Calls the Twitter API." width="100px" height="100px"><br> Calls the Twitter API to get the latest 2300 tweets from your public feed.<br> | 
-<img src="http://s7.postimg.org/ltvbrujbv/3_UM_api.gif" alt="Calls the Personality Insights API." width="100px" height="100px"><br> Calls the Personality Insights API to analyze the language in your tweets and apply it to a spectrum of characteristics.<br> |
-<img src="http://s7.postimg.org/nmy8g64ij/4_compare_results.gif" alt="Compares your Personality Insights profile to 232 celebrity profiles analyzed with the service." width="100px" height="100px"><br> Compares your Personality Insights profile to 232 celebrity profiles analyzed with the service.<br> |
-<img src="http://s7.postimg.org/we59afntn/5_celeb_match.png" alt="Sorts your matches and shows you the highest and lowest. These are calculated by the euclidean distance between the two." width="100px" height="100px"><br> Sorts your matches and shows you the highest and lowest. These are calculated by the euclidean distance between the two.<br> |
+2. Download and install the [Cloud Foundry CLI][cloud_foundry_url] tool
 
+3. Clone the app to your local environment from your terminal using the following command:
 
-## Getting Started
+  ```
+  $ git clone https://github.com/JakePeyser/runkeeper-hashmatch.git
+  ```
 
-This instructions will help you install the celebrities app in your local environment.
+4. `cd` into this newly created directory
 
-1. Clone the repository with:
+5. Open the `manifest.yml` file and change the `host` value to something unique
 
-    ```sh
-    $ git clone git@github.com:watson-developer-cloud/yourcelebritymatch.git
-    ```
+  The host you choose will determinate the subdomain of your application's URL: `<host>.mybluemix.net`
 
-1. Install [node][node] (use v0.10.31)
+6. Connect to Bluemix in the command line tool and follow the prompts to log in:
 
-1. Install [mongodb][mongodb]
+  ```
+  $ cf api https://api.ng.bluemix.net
+  $ cf login
+  ```
 
-1. Install the npm modules:
+7. Create the Personality Insights service in Bluemix:
 
-    ```sh
-    $ npm install
-    ```
-    **Note:** Make sure you are in the project directory, the `package.json` file should be visible.
+  ```
+  $ cf create-service personality_insights tiered runkeeper-personality-insights
+  ```
 
-1. Start mongodb
+8. Push your app to Bluemix. We need to perform additional steps once it is deployed, so we will add the `--no-start` option:
 
-    ```sh
-    $ mongod
-    ```
-    (Run this in a separate terminal window)
+  ```
+  $ cf push --no-start
+  ```
 
-1. You need some credentials to use Twitter API, Personality Insights and MongoDC:
-  * Get credentials to use Personality Insights, instructions [here][pi_cred].  
-  * Create a **FREE** Mongodb database using [MongoLab](https://mongolab.com).  
-  * Create a Twitter app and get the API credentials [here][twitter_app].
-1. Update the Twitter, MongoDB and Personality Insights credentials in `config/config.js`
-    ```js
-    mongodb: process.env.MONGODB || 'mongodb://localhost/celebs',
+9. [Create a Twitter app][github_create_twitter_app_url]
 
-    {
-      personality_insights: {
-        url:      '<url>',
-        username: '<username>',
-        password: '<password>'
-      },
+10. Create a user-provided service to represent your Twitter app, taking the corresponding credentials from your Twitter app's `Keys and Access Tokens` page:
 
-      twitter: [{
-        consumer_key:       '<consumer_key>',
-        consumer_secret:    '<consumer_secret>',
-        access_token_key:   '<access_token_key>',
-        access_token_secret:'<access_token_secret>'
-      }]
-    }
-    ```
+	```
+	$ cf cups runkeeper-twitter -p '{"access_token_key":"KEY","access_token_secret":"SECRET","consumer_key":"KEY","consumer_secret":"SECRET"}'
+	```
 
-1. Start the app
+11. Bind this Twitter service to your app:
 
-    ```sh
-    $ node app.js
-    ```
+	```
+	$ cf bind-service runkeeper-hashmatch runkeeper-twitter
+	```
 
-1. Update the database with the celebrities by going to:
+12. Create a managed MongoDB instance on [Compose.io][compose_url]
+	* [Sign up for a Compose.io free trial][compose_signup_url] and select MongoDB or use your existing account and [create a new MongoDB deployment][compose_new_mongo_url]
+	* Once your Mongo deployment has been provisioned, create a DB called `runkeeperDB`
+	* Navigate to the Users tab of your new DB and select Add User. Assign your username and password as `rk-admin` and `rk-key`, respectively
+	* Navigate to the `Admin` tab and note the host and port of your primary replica set
 
-    `http://localhost:3000/celebrities/syncdb`
+13. Go to the [MongoDB by Compose service][mongo_service_url] in the Bluemix catalog
+	* Bind the service to `runkeeper-hashmatch`
+	* Name the service `runkeeper-mongo-db`
+	* Fill out your credentials with the info from the previous steps
+	* Click `Create`
 
+14. Restage your application, either by accepting the prompt after the last step or executing the following command:
 
-## Personality Insights Credentials
-The credentials for the services are stored in the [VCAP_SERVICES][vcap_environment] environment variable. In order to get them you need to first create and bind the service to your application.
+	```
+	$ cf restage runkeeper-hashmatch
+	```
 
-There are two ways to get the credentials, you can use Bluemix to access your app and view the `VCAP_SERVICES` there or you can run:
+And voila! You now have your very own instance of Runkeeper Hashmatch running on Bluemix. Now all that is left is to populate your DB with hashtag pesonality data for comparisons. Check out the [Analyzing Hashtag Data section][github_analyze_section_url] for instructions on this process.
 
-```sh
-$ cf env <application-name>
-```
+## Running the app locally
 
-Example output:
-```sh
-  System-Provided:
-  {
-  "VCAP_SERVICES": {
-    "personality_insights": [{
-        "credentials": {
-          "password": "<password>",
-          "url": "<url>",
-          "username": "<username>"
-        },
-      "label": "personality_insights",
-      "name": "personality-insights-service",
-      "plan": "IBM Watson Personality Insights Monthly Plan"
-   }]
-  }
-  }
-```
+1. If you do not already have a Bluemix account, [sign up here][bluemix_signup_url]
 
-You need to copy `username`, `password`.
+2. If you have not already, [download node.js][download_node_url] and install it on your local machine
 
-## Celebrities
-  The application comes with two profiles: [@germanatt][german_twitter] and [@nfriedly][nathan_twitter]. If you want to add more profiles you will have to:
-  1. Choose a person to include as 'celebrity'. You need at least 100 different words writted by that person, blog posts, tweets, text messages, emails will work.
-  1. Get the profile by using the [Personality Insights][pi_docs] service with the text you have and save the json profile in the `profiles` folder. Make sure the file has the `.json` extension as in the examples provided.
-  1. Start the app and go to: `http://localhost:3000/celebrities/syncdb`. It will repopulate the application database and add the new profile.
+3. Clone the app to your local environment from your terminal using the following command
 
-## License
+  ```
+  $ git clone https://github.com/JakePeyser/runkeeper-hashmatch.git
+  ```
 
-  This sample code is licensed under Apache 2.0. Full license text is available in [LICENSE](LICENSE).
+4. cd into this newly created directory
 
-## Contributing
+5. Create a [Personality Insights service][pi_service_url] using your Bluemix account and replace the corresponding credentials in your `vcap-local.json` file
 
-  See [CONTRIBUTING](CONTRIBUTING.md).
+6. [Create a Twitter app][github_create_twitter_app_url] and copy the credentials over to your `vcap-local.json` file
 
-## Open Source @ IBM
-  Find more open source projects on the [IBM Github Page](http://ibm.github.io/)
+7. Install [mongodb][mongodb_url]
 
-[bluemix]: https://console.ng.bluemix.net/
-[node]: http://nodejs.org/download
-[mongodb]: http://docs.mongodb.org/manual/installation/
-[pi_cred]: https://github.com/watson-developer-cloud/um-ruby/blob/master/README.md
-[twitter_app]: https://apps.twitter.com/app/new
-[german_twitter]: https://twitter.com/germanatt
-[nathan_twitter]: https://twitter.com/nfriedly
+8. Install the required npm packages using the following command:
+
+  ```
+  $ npm install
+  ```
+
+9. Start mongodb in a separate terminal window:
+
+  ```
+  $ mongod
+  ```
+
+10. Start the app in your original terminal window:
+
+  ```
+  $ npm start
+  ```
+
+Your app will be automatically assigned to a port which will be logged to your terminal. To access the app, go to `localhost:PORT` in your browser. Now all that is left is to populate your DB with hashtag pesonality data for comparisons. Check out the [Analyzing Hashtag Data section][github_analyze_section_url] for instructions on this process. Happy developing!
+
+## Additional Setup
+
+### Creating a Twitter App
+
+1. [Sign up for Twitter][twitter_signup_url] or use your existing account to [create a new Twitter app][twitter_app_url]
+	* Name it `runkeeper-hashmatch-ID`, substituting your GitHub username for `ID`
+	* Give it a description
+	* Use [this project's GitHub repo][github_repo_url] or the URL of your fork as the website
+
+2. Create your Twitter app access token
+	* Navigate to the `Keys and Access Tokens` tab
+	* Click the button labeled `Create my access token`
+
+### Analyzing Hashtag Data
+
+**`/analyze/twitter/@hashtag`:** Finds users who have recently tweeted using #hashtag, collects their tweets, and stores them in the database.
+
+**`/analyze/personality/@hashtag`:** Aggregates users' tweets for the input hashtag and runs them through the Personality Insights API, saving the results in the database. If analysis for the hashtag already exists, it is overwritten with the new results
+
+**Note:** Keep the [Twitter API rate limiting policy][twitter_rate_limit_url] in mind, as the first route hits the API an average of 25 times per call.
+
+## Troubleshooting
+
+The primary source of debugging information for your Bluemix app is the logs. To see them, run the following command using the Cloud Foundry CLI:
+
+  ```
+  $ cf logs runkeeper-hashmatch --recent
+  ```
+For more detailed information on troubleshooting your application, see the [Troubleshooting section](https://www.ng.bluemix.net/docs/troubleshoot/tr.html) in the Bluemix documentation.
+
+## Contribute
+We are more than happy to accept external contributions to this project, be it in the form of issues and pull requests. If you find a bug, please report it via the [Issues section][issues_url] or even better, fork the project and submit a pull request with your fix! Pull requests will be evaulated on an individual basis based on value add to the sample application.
+
+## Privacy Notice
+The capital-weather sample web application includes code to track deployments to Bluemix and other Cloud Foundry platforms. The following information is sent to a [Deployment Tracker](https://github.com/cloudant-labs/deployment-tracker) service on each deployment:
+
+* Application Name (application_name)
+* Space ID (space_id)
+* Application Version (application_version)
+* Application URIs (application_uris)
+
+This data is collected from the VCAP_APPLICATION environment variable in IBM Bluemix and other Cloud Foundry platforms. This data is used by IBM to track metrics around deployments of sample applications to IBM Bluemix. Only deployments of sample applications that include code to ping the Deployment Tracker service will be tracked.
+
+### Disabling Deployment Tracking
+
+Deployment tracking can be disabled by removing `require("cf-deployment-tracker-client").track();` from the beginning of the `app.js` file.
+
+[github_repo_url]: https://github.com/JakePeyser/runkeeper-hashmatch
+[github_create_twitter_app_url]: #user-content-creating-a-twitter-app
+[github_analyze_section_url]: #user-content-analyzing-hashtag-data
+[bluemix_signup_url]: https://ibm.biz/runkeeper-hashmatch-signup
+[cloud_foundry_url]: https://github.com/cloudfoundry/cli
+[download_node_url]: https://nodejs.org/download/
+[mongodb_url]: http://docs.mongodb.org/manual/installation/
+[twitter_url]: https://twitter.com/
+[twitter_signup_url]: https://twitter.com/signup
+[twitter_app_url]: https://apps.twitter.com/app/new
+[twitter_rate_limit_url]: https://dev.twitter.com/rest/public/rate-limiting
+[compose_url]: https://compose.io/
+[compose_signup_url]: https://app.compose.io/signup/svelte
+[compose_new_mongo_url]: https://app.compose.io/ibm-12/deployments/new
+[mongo_service_url]: https://console.ng.bluemix.net/catalog/services/mongodb-by-compose/
+[pi_service_url]: https://console.ng.bluemix.net/catalog/services/personality-insights/
 [pi_docs]: http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/personality-insights/
-[vcap_environment]: https://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/getting_started/#VcapEnvVar
+[issues_url]: https://github.com/JakePeyser/runkeeper-hashmatch/issues
