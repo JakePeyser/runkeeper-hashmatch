@@ -61,7 +61,7 @@ Runkeeper Hashmatch uses the IBM Watson [Personality Insights service][pi_docs] 
 	* [Sign up for a Compose.io free trial][compose_signup_url] and select MongoDB or use your existing account and [create a new MongoDB deployment][compose_new_mongo_url]
 	* Once your Mongo deployment has been provisioned, create a DB called `runkeeperDB`
 	* Navigate to the Users tab of your new DB and select Add User. Assign your username and password as `rk-admin` and `rk-key`, respectively
-	* Navigate to the `Admin` tab and note the host and port of your primary replica set
+	* Navigate to the `Admin` tab and note the host (e.g. `horace.1.mongolayer.com`) and port of your primary replica set
 
 13. Go to the [MongoDB by Compose service][mongo_service_url] in the Bluemix catalog
 	* Bind the service to `runkeeper-hashmatch`
@@ -132,9 +132,9 @@ Your app will be automatically assigned to a port which will be logged to your t
 
 ### Analyzing Hashtag Data
 
-**`/analyze/twitter/@hashtag`:** Finds users who have recently tweeted using #hashtag, collects their tweets, and stores them in the database.
+**`/analyze/twitter/@hashtag`:** Finds users who have recently tweeted using #hashtag, collects their tweets, and stores them in the `profiles` collection in the database.
 
-**`/analyze/personality/@hashtag`:** Aggregates users' tweets for the input hashtag and runs them through the Personality Insights API, saving the results in the database. If analysis for the hashtag already exists, it is overwritten with the new results
+**`/analyze/personality/@hashtag`:** Aggregates users' tweets for the input hashtag and runs them through the Personality Insights API, saving the results in the `hashtags` collection in the database. If analysis for the hashtag already exists, it is overwritten with the new results
 
 **Note:** Keep the [Twitter API rate limiting policy][twitter_rate_limit_url] in mind, as the first route hits the API an average of 25 times per call.
 

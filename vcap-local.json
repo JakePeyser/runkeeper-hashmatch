@@ -5,7 +5,7 @@
         "name": "runkeeper-mongo-db",
         "label": "user-provided",
         "credentials": {
-          "uri": "mongodb://localhost/celebs",
+          "uri": "mongodb://localhost/runkeeper",
           "port": "10190",
           "user": "USER",
           "password": "PASSWORD"

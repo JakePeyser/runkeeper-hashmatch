@@ -43,14 +43,25 @@ require('./app/models/hashtag');
 // Mongoose by default sets the auto_reconnect option to true.
 // Recommended a 30 second connection timeout because it allows for
 // plenty of time in most operating environments.
-var mongoCreds = getServiceCreds(appEnv, 'runkeeper-mongo-db');
+var mongoURL,
+  mongoCreds = getServiceCreds(appEnv, 'runkeeper-mongo-db');
+if (appEnv.isLocal)
+  mongoURL = mongoCreds.uri;
+else {
+  mongoURL = 'mongodb://' +
+    mongoCreds.user + ':' +
+    mongoCreds.password + '@' +
+    mongoCreds.uri + ':' +
+    mongoCreds.port + '/runkeeperDB';
+}
+
 var connect = function () {
   console.log('connect-to-mongodb');
   var options = {
     server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
     replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } }
   };
-  mongoose.connect(mongoCreds.uri, options);
+  mongoose.connect(mongoURL, options);
 };
 connect();
 
@@ -85,6 +96,9 @@ require('./app/routes/index')(app);
 
 // Global error handler
 require('./config/error-handler')(app);
+
+// Deployment tracker
+require("cf-deployment-tracker-client").track();
 
 // Start listening for connections
 app.listen(appEnv.port, function() {
