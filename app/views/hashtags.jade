@@ -1,0 +1,35 @@
+extends ./layout.jade
+
+block content
+  include ./navbar.jade
+  .row
+    if hashtags
+      .col-xs-12.col-sm-10.col-md-8.col-sm-push-1.col-md-push-2(style='margin-top:40px')
+        h1 Hashtag List
+        div.alert.alert-info
+          p
+            strong #{hashtags.length}
+            |  hashtags in the list
+        div
+          table.table.table-hover(data-height='500', data-show-columns="true", data-search='true')
+            thead
+              tr
+                th Image
+                th Hashtag
+                th Users
+              each c, index in hashtags
+                tr
+                  td.text-center
+                    div.avatar-small(style='height:48px;width:48px;')
+                      img(src='#{c.image}').img-rounded.celebrity
+                  td ##{c.hashtag}
+                  td #{c.users}
+        div.alert.alert-info
+          p
+            strong #{hashtags.length}
+            |  hashtags in the list
+    if error
+      .col-md-9
+        div.alert.alert-danger
+          h3 Error
+        p #{error}

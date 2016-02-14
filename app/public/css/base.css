@@ -135,6 +135,14 @@ button.button, a.button {
 }
 
 /**
+* Table Styles
+*/
+.table>thead>tr>td {
+  vertical-align: middle;
+  white-space: pre;
+}
+
+/**
 * Footer Styles
 */
 body {height: 100%;}

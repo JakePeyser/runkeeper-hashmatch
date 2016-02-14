@@ -34,7 +34,6 @@
 }
 
 .how-it-worked a.button {
-  border-radius: .35rem;
   border: 1px solid #f1f1f2;
   color: #f1f1f2;
   padding: .25rem .5rem;
@@ -47,7 +46,7 @@
   color: rgba(35,31,32, .92);
 }
 .how-it-worked h3 {
-  color: #fcb614;
+  color: #efc100;
   font-weight: 600;
   margin-top: 3rem;
   margin-bottom: .8rem;
@@ -57,11 +56,11 @@
   font-weight: 600;
 }
 .how-it-worked a {
-  color: #1cc665;
+  color: #8cd211;
   text-decoration: underline;
 }
 .how-it-worked a:hover {
-  color: #55F99B;
+  color: #a3db40;
 }
 
 .page-content {

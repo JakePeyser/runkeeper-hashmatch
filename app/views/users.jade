@@ -1,0 +1,40 @@
+extends ./layout.jade
+
+block content
+  include ./navbar.jade
+  .row
+    if users
+      .col-xs-10.col-md-8.col-xs-push-1.col-md-push-2(style='margin-top:40px')
+        h1 User List
+        div.alert.alert-info
+          p
+            strong #{users.length}
+            |  users in the list
+        div
+          table.table.table-hover(data-height='500', data-show-columns="true", data-search='true')
+            thead
+              tr
+                th Image
+                th Name
+                th Handle
+                th Followers
+                th Tweets
+              each c, index in users
+                tr
+                  td.text-center
+                    div.avatar-small(style='height:48px;width:48px;')
+                      img(src='#{c.image}').img-rounded.celebrity
+                  td #{c.name}
+                  td
+                    a(href='https://twitter.com/#{c.username}') @#{c.username}
+                  td #{c.followers}
+                  td #{c.tweets}
+        div.alert.alert-info
+          p
+            strong #{users.length}
+            |  users in the list
+    if error
+      .col-md-9
+        div.alert.alert-danger
+          h3 Error
+        p #{error}

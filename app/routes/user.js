@@ -27,18 +27,18 @@ var router   = require('express').Router(),
 
 // We're only going to hit the db once for these
 var pics = [];
-var celebs = [];
+var profiles = [];
 var hashtags = [];
-var getCelebrityFromDB = Q.denodeify(Profile.find.bind(Profile)),
+var getProfilesFromDB = Q.denodeify(Profile.find.bind(Profile)),
   getHashtagsFromDB = Q.denodeify(Hashtag.find.bind(Hashtag));
 
 /**
- * Updates an array with the celebrity profile pictures.
+ * Updates an array with the profile pictures.
  */
 function updateBackground() {
-  getCelebrityFromDB({}).then(function(profiles) {
-    celebs = profiles;
-    var images = profiles.map(function(profile) {
+  getProfilesFromDB({}).then(function(profs) {
+    profiles = profs;
+    var images = profs.map(function(profile) {
       return {
         username: '@' + profile.username,
         image: profile.image
@@ -116,9 +116,9 @@ router.get('/like/@:username', function (req, res) {
       return res.render('index',
         { info: '@' + username + ' is protected, try another one.', pics: pics});
 
-    return getCelebrityFromDB({id:user.id})
-    .then(function(celebrity){
-      if (celebrity && celebrity.length === 0) {
+    return getProfilesFromDB({id:user.id})
+    .then(function(profile){
+      if (profile && profile.length === 0) {
         console.log(user.username, 'is not a runner, lets see if they are in the database');
         return getUserFromDB({id:user.id})
         .then(function(dbUser) {
@@ -147,8 +147,8 @@ router.get('/like/@:username', function (req, res) {
           }
         });
       } else {
-        console.log(user.username,'is a celebrity, we return the profile from the DB');
-        return extend(celebrity[0], user);
+        console.log(user.username,'is a runner, we return the profile from the DB');
+        return extend(profile[0], user);
       }
     })
     .then(function(dbUser) {
@@ -160,7 +160,7 @@ router.get('/like/@:username', function (req, res) {
         console.log(dbUser.username,' to be compared to', hashtags.length, 'hashtags');
         var distances = util.calculateDistances(dbUser, hashtags);
 
-        // Remove celebrities to match to themselves
+        // Remove profiles to match to themselves
         if (distances[0].distance === 1.00)
           distances = distances.slice(1);
 

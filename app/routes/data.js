@@ -22,12 +22,12 @@ var router = require('express').Router(),
   User     = mongoose.model('User'),
   Hashtag  = mongoose.model('Hashtag');
 
-//=====CELEBS===================================================================
+//=====PROFILES=================================================================
 
 /**
- * Send the celebrity data
+ * Send the profile data
 */
-router.get('/celebs', function(req,res) {
+router.get('/profiles', function(req,res) {
   Profile.find({},function(err,profiles){
     if (err)
       res.json({error: err});
@@ -36,7 +36,7 @@ router.get('/celebs', function(req,res) {
   });
 });
 
-router.get('/celebs/reset', function(req,res) {
+router.get('/profiles/reset', function(req,res) {
   console.log('removing profiles from database');
   var removeAll = Q.denodeify(Profile.remove.bind(Profile));
 
@@ -49,23 +49,23 @@ router.get('/celebs/reset', function(req,res) {
   });
 });
 
-router.post('/celebs/id/', function(req, res) {
+router.post('/profiles/id/', function(req, res) {
   var id = req.body.id;
   if (id && id.substr(0,1) !== '@') {
     id = '@' + id;
   }
-  res.redirect(id ? '/celebs/id/' + id : '/');
+  res.redirect(id ? '/profiles/id/' + id : '/');
 });
 
-router.post('/celebs/hashtag/', function(req, res) {
+router.post('/profiles/hashtag/', function(req, res) {
   var hashtag = req.body.hashtag;
   if (hashtag && hashtag.substr(0,1) !== '@') {
     hashtag = '@' + hashtag;
   }
-  res.redirect(hashtag ? '/celebs/hashtag/' + hashtag : '/');
+  res.redirect(hashtag ? '/profiles/hashtag/' + hashtag : '/');
 });
 
-router.get('/celebs/id/@:id', function(req,res) {
+router.get('/profiles/id/@:id', function(req,res) {
   var id = req.params.id;
   Profile.findOne({id:id},function(err,profile){
     if (err)
@@ -77,7 +77,7 @@ router.get('/celebs/id/@:id', function(req,res) {
   });
 });
 
-router.get('/celebs/hashtag/@:hashtag', function(req,res) {
+router.get('/profiles/hashtag/@:hashtag', function(req,res) {
   var hashtag = req.params.hashtag;
   Profile.find({hashtag:hashtag},function(err,profiles){
     if (err)
@@ -89,12 +89,12 @@ router.get('/celebs/hashtag/@:hashtag', function(req,res) {
   });
 });
 
-router.get('/celebs/id/:id', function(req, res) {
-  res.redirect('/data/celebs/id/@' + req.params.id);
+router.get('/profiles/id/:id', function(req, res) {
+  res.redirect('/data/profiles/id/@' + req.params.id);
 });
 
-router.get('/celebs/hashtag/:hashtag', function(req, res) {
-  res.redirect('/data/celebs/hashtag/@' + req.params.hashtag);
+router.get('/profiles/hashtag/:hashtag', function(req, res) {
+  res.redirect('/data/profiles/hashtag/@' + req.params.hashtag);
 });
 
 //=====USERS====================================================================

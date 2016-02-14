@@ -28,24 +28,24 @@ var router   = require('express').Router(),
 
 // We're only going to hit the db once for these
 var pics = [],
-  celebs =[],
+  profiles =[],
   hashtags =[];
 
   // Declare some promises to handle database
   var profileExistsInDB = Q.denodeify(Profile.checkExistence.bind(Profile)),
     saveProfileInDB = Q.denodeify(Profile.createOrUpdate.bind(Profile)),
-    getCelebrityFromDB = Q.denodeify(Profile.find.bind(Profile)),
+    getProfilesFromDB = Q.denodeify(Profile.find.bind(Profile)),
     saveHashtagInDB = Q.denodeify(Hashtag.createOrUpdate.bind(Hashtag));
 
 var MAX_COUNT = 20;
 
 /**
- * Updates an array with the celebrity profile pictures.
+ * Updates an array with the profile pictures.
  */
 function updateBackground() {
-  getCelebrityFromDB({}).then(function(profiles) {
-    celebs = profiles;
-    var images = profiles.map(function(profile) {
+  getProfilesFromDB({}).then(function(profs) {
+    profiles = profs;
+    var images = profs.map(function(profile) {
       return {
         username: '@' + profile.username,
         image: profile.image

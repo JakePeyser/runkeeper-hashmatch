@@ -25,24 +25,36 @@ var router = require('express').Router(),
 /**
  * Render the celebrity list
 */
-router.get('/', function(req,res) {
-  Profile.find({},function(err,profiles){
+router.get('/profiles', function(req,res) {
+  Profile.find({}, function(err,profiles) {
     if (err)
-      res.render('celebrities',{error: err});
+      res.render('profiles', {error: err});
     else
-      res.render('celebrities',{profiles: profiles});
+      res.render('profiles', {profiles: profiles});
   });
 });
 
 /**
- * Render the celebrity list
+ * Render the users list
 */
 router.get('/users', function(req,res) {
-  User.find({},function(err,profiles){
+  User.find({}, function(err,users) {
     if (err)
-      res.render('celebrities',{error: err});
+      res.render('users', {error: err});
     else
-      res.render('celebrities',{profiles: profiles});
+      res.render('users', {users: users});
+  });
+});
+
+/**
+ * Render the hashtags list
+*/
+router.get('/hashtags', function(req,res) {
+  Hashtag.find({}, function(err,hashtags) {
+    if (err)
+      res.render('hashtags', {error: err});
+    else
+      res.render('hashtags', {hashtags: hashtags});
   });
 });
 
