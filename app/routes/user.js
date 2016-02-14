@@ -140,6 +140,7 @@ router.get('/like/@:username', function (req, res) {
                   console.log(username, 'analyze with personality insights');
 
                   user.personality = JSON.stringify(profile);
+                  console.log('adding', username, 'to the database');
                   return saveUserInDB(user);
                 });
               });
@@ -152,7 +153,6 @@ router.get('/like/@:username', function (req, res) {
     })
     .then(function(dbUser) {
       if (!dbUser) return;
-      console.log(dbUser.name, 'added to the database');
 
       // Retrieve hashtags and their personality from the DB
       return getHashtagsFromDB({})
@@ -192,7 +192,7 @@ router.get('/like/@:username', function (req, res) {
       status = 404;
     } else if (error.error || error.error_code) {
       ret.info = 'Sorry, our analysis requires 100 unique words. ' +
-        'We weren\'t able to find that many words in @'+ username+' tweets.';
+        'We weren\'t able to find that many words in @'+ username+'\'s tweets.';
       status = 400;
     } else {
       ret.error = 'Sorry, there was an error. Please try again later.';

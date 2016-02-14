@@ -1,0 +1,38 @@
+{
+  "services": {
+    "user-provided": [
+      {
+        "name": "runkeeper-mongo-db",
+        "label": "user-provided",
+        "credentials": {
+          "uri": "mongodb://localhost/celebs",
+          "port": "10190",
+          "user": "USER",
+          "password": "PASSWORD"
+        }
+      },
+      {
+        "name": "runkeeper-twitter",
+        "label": "user-provided",
+        "credentials": {
+          "access_token_key": "KEY",
+          "access_token_secret": "PASSWORD",
+          "consumer_key": "KEY",
+          "consumer_secret": "PASSWORD"
+        }
+      }
+    ],
+    "personality_insights": [
+      {
+        "name": "runkeeper-personality-insights",
+        "label": "personality_insights",
+        "plan": "tiered",
+        "credentials": {
+          "url": "https://gateway.watsonplatform.net/personality-insights/api",
+          "username": "USER",
+          "password": "PASSWORD"
+        }
+      }
+    ]
+  }
+}

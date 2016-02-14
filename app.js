@@ -19,12 +19,21 @@
 
 var express     = require('express'),
   app           = express(),
-  config        = require('./config/config'),
   mongoose      = require('mongoose'),
+  cfenv         = require('cfenv'),
   watson        = require('watson-developer-cloud'),
   TwitterHelper = require('./app/util/twitter-helper');
 
+// Set up environment variables
+// cfenv provides access to your Cloud Foundry environment
+var vcapLocal = null
+try {
+  vcapLocal = require("./vcap-local.json")
+}
+catch (e) {}
 
+var appEnvOpts = vcapLocal ? {vcap:vcapLocal} : {}
+var appEnv = cfenv.getAppEnv(appEnvOpts);
 
 // Load Mongoose Schemas
 require('./app/models/profile');
@@ -34,13 +43,14 @@ require('./app/models/hashtag');
 // Mongoose by default sets the auto_reconnect option to true.
 // Recommended a 30 second connection timeout because it allows for
 // plenty of time in most operating environments.
+var mongoCreds = getServiceCreds(appEnv, 'runkeeper-mongo-db');
 var connect = function () {
   console.log('connect-to-mongodb');
   var options = {
     server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
     replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } }
   };
-  mongoose.connect(config.mongodb, options);
+  mongoose.connect(mongoCreds.uri, options);
 };
 connect();
 
@@ -52,10 +62,15 @@ mongoose.connection.on('disconnected', connect);
 require('./config/express')(app);
 
 // Create the twitter helper
-var twit = new TwitterHelper(config.twitter);
+var twitterInstances = [],
+  twitterCreds = getServiceCreds(appEnv, 'runkeeper-twitter');
+twitterInstances.push(twitterCreds);
+var twit = new TwitterHelper(twitterInstances);
 
 // Create the personality insights service
-var personality_insights = new watson.personality_insights(config.personality_insights);
+var piCreds = getServiceCreds(appEnv, 'runkeeper-personality-insights');
+piCreds.version = 'v2';
+var personality_insights = new watson.personality_insights(piCreds);
 
 // Make the services accessible to the router
 app.set('json spaces', 2);
@@ -71,8 +86,17 @@ require('./app/routes/index')(app);
 // Global error handler
 require('./config/error-handler')(app);
 
+// Start listening for connections
+app.listen(appEnv.port, function() {
+  console.log("server started at", appEnv.url);
+});
 
-// Start the server
-var port = (process.env.VCAP_APP_PORT || 3000);
-app.listen(port);
-console.log('App listening on:', port);
+// Retrieves service credentials for the input service
+function getServiceCreds(appEnv, serviceName) {
+  var serviceCreds = appEnv.getServiceCreds(serviceName)
+  if (!serviceCreds) {
+    console.log("service " + serviceName + " not bound to this application");
+    return null;
+  }
+  return serviceCreds;
+}

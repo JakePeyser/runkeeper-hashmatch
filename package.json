@@ -7,6 +7,7 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "cfenv": "1.0.x",
     "body-parser": "^1.14.2",
     "express": "^4.13.4",
     "express-rate-limit": "^2.1.0",
@@ -19,6 +20,10 @@
     "twitter": "^0.2.13",
     "hashmap": "2.0.x",
     "watson-developer-cloud": "^1.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JakePeyser/runkeeper-hashmatch.git"
   },
   "author": "IBM Corp.",
   "contributors": [
