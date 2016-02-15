@@ -4,6 +4,8 @@ Runkeeper Hashmatch uses the IBM Watson [Personality Insights service][pi_docs] 
   
 [![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy)
 
+![Bluemix Deployments](https://deployment-tracker.mybluemix.net/stats/ecea8bc6b398900fdf67be67d8c4c7db/badge.svg)
+
 **Note**: If you deploy the application in Bluemix using the above button, you will need to complete steps 9-14 below to finish the setup process.
 
 ## Running the app on Bluemix
