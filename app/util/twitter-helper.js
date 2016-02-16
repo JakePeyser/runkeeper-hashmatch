@@ -123,12 +123,14 @@ TwitterHelper.prototype.showUser = function(screen_name, callback) {
  * Searches for recent tweets using input query
  * It looks at query to determinate what to search for
  */
-TwitterHelper.prototype.searchTweets = function(query, params, callback) {
+TwitterHelper.prototype.searchTweets = function(query, params, raw, callback) {
   console.log('search:', query);
   this.getInstance().search(query, params, function(tw_tweets) {
-    if (tw_tweets.statusCode){
+    if (tw_tweets.statusCode) {
       console.log('error searching for tweets');
       callback(tw_tweets);
+    } else if (raw) {
+        callback(null, tw_tweets.statuses);
     } else
       callback(null, tw_tweets.statuses.map(Formatter.toTweet.bind(Formatter)));
   });

@@ -28,7 +28,7 @@ var router = require('express').Router(),
  * Send the profile data
 */
 router.get('/profiles', function(req,res) {
-  Profile.find({},function(err,profiles){
+  Profile.find({}, 'id name username location followers hashtag tweets image', function(err,profiles) {
     if (err)
       res.json({error: err});
     else
@@ -67,7 +67,7 @@ router.post('/profiles/hashtag/', function(req, res) {
 
 router.get('/profiles/id/@:id', function(req,res) {
   var id = req.params.id;
-  Profile.findOne({id:id},function(err,profile){
+  Profile.findOne({id:id}, function(err,profile) {
     if (err)
       res.json({error: err});
     else if (!profile)
@@ -79,7 +79,7 @@ router.get('/profiles/id/@:id', function(req,res) {
 
 router.get('/profiles/hashtag/@:hashtag', function(req,res) {
   var hashtag = req.params.hashtag;
-  Profile.find({hashtag:hashtag},function(err,profiles){
+  Profile.find({hashtag:hashtag}, 'id name username location followers hashtag tweets image', function(err,profiles) {
     if (err)
       res.json({error: err});
     else if (!profiles || !profiles.length)
@@ -103,7 +103,7 @@ router.get('/profiles/hashtag/:hashtag', function(req, res) {
  * Send the users data
 */
 router.get('/users', function(req,res) {
-  User.find({},function(err,users){
+  User.find({}, 'id name username followers tweets image updated', function(err,users) {
     if (err)
       res.json({error: err});
     else
@@ -134,7 +134,7 @@ router.post('/users/id/', function(req, res) {
 
 router.get('/users/id/@:id', function(req,res) {
   var id = req.params.id;
-  User.findOne({id:id},function(err,user){
+  User.findOne({id:id}, function(err,user) {
     if (err)
       res.json({error: err});
     else if (!user)
@@ -154,7 +154,7 @@ router.get('/users/id/:id', function(req, res) {
  * Send the hashtag data
 */
 router.get('/hashtags', function(req,res) {
-  Hashtag.find({},function(err,hashtags){
+  Hashtag.find({}, 'hashtag users image', function(err,hashtags) {
     if (err)
       res.json({error: err});
     else
@@ -185,7 +185,7 @@ router.post('/hashtags/hashtag/', function(req, res) {
 
 router.get('/hashtags/hashtag/@:hashtag', function(req,res) {
   var hashtag = req.params.hashtag;
-  Hashtag.findOne({hashtag:hashtag},function(err,hashtag){
+  Hashtag.findOne({hashtag:hashtag}, function(err,hashtag) {
     if (err)
       res.json({error: err});
     else if (!hashtag)

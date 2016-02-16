@@ -26,7 +26,7 @@ var router = require('express').Router(),
  * Render the celebrity list
 */
 router.get('/profiles', function(req,res) {
-  Profile.find({}, function(err,profiles) {
+  Profile.find({}, 'image name username hashtag followers tweets', function(err,profiles) {
     if (err)
       res.render('profiles', {error: err});
     else
@@ -38,7 +38,7 @@ router.get('/profiles', function(req,res) {
  * Render the users list
 */
 router.get('/users', function(req,res) {
-  User.find({}, function(err,users) {
+  User.find({}, 'image name username followers tweets', function(err,users) {
     if (err)
       res.render('users', {error: err});
     else
@@ -50,7 +50,7 @@ router.get('/users', function(req,res) {
  * Render the hashtags list
 */
 router.get('/hashtags', function(req,res) {
-  Hashtag.find({}, function(err,hashtags) {
+  Hashtag.find({}, 'image hashtag users', function(err,hashtags) {
     if (err)
       res.render('hashtags', {error: err});
     else

@@ -33,11 +33,9 @@ var ProfileSchema = mongoose.Schema({
 // Create a new user or update the existing one
 ProfileSchema.statics.createOrUpdate = function(profile, done){
   var Profile = this;
-  // Build dynamic key query
-  var query = { username: profile.username };
 
   // Search for a profile from the given auth origin
-  Profile.findOne(query, function(err, user){
+  Profile.findOne({username: profile.username}, function(err, user){
     if(err) return done(err);
     if(user) {
       extend(user,profile);
@@ -61,13 +59,11 @@ ProfileSchema.statics.createOrUpdate = function(profile, done){
 // Check if the user of a tweet exists in the DB
 ProfileSchema.statics.checkExistence = function(inputProfile, done){
   var Profile = this;
-  // Build dynamic key query
-  var query = { id: inputProfile.id };
 
   // Search for a profile from the given auth origin
-  Profile.findOne(query, function(err, profile){
-    if(err) return done(err);
-    if(profile) inputProfile.exists = true;
+  Profile.findOne({id:inputProfile.id}, 'id', function(err, profile){
+    if (err) return done(err);
+    else if (profile) inputProfile.exists = true;
     else inputProfile.exists = false;
     return done(null, inputProfile);
   });

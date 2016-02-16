@@ -27,15 +27,14 @@ var router   = require('express').Router(),
   util       = require('../util/util');
 
 // We're only going to hit the db once for these
-var pics = [],
-  profiles =[],
-  hashtags =[];
+var pics = [];
 
-  // Declare some promises to handle database
-  var profileExistsInDB = Q.denodeify(Profile.checkExistence.bind(Profile)),
-    saveProfileInDB = Q.denodeify(Profile.createOrUpdate.bind(Profile)),
-    getProfilesFromDB = Q.denodeify(Profile.find.bind(Profile)),
-    saveHashtagInDB = Q.denodeify(Hashtag.createOrUpdate.bind(Hashtag));
+// Declare some promises to handle database
+var profileExistsInDB = Q.denodeify(Profile.checkExistence.bind(Profile)),
+  saveProfileInDB = Q.denodeify(Profile.createOrUpdate.bind(Profile)),
+  getProfilesFromDB = Q.denodeify(Profile.find.bind(Profile)),
+  saveHashtagInDB = Q.denodeify(Hashtag.createOrUpdate.bind(Hashtag)),
+  getHashtagsFromDB = Q.denodeify(Hashtag.find.bind(Hashtag));
 
 var MAX_COUNT = 20;
 
@@ -43,9 +42,8 @@ var MAX_COUNT = 20;
  * Updates an array with the profile pictures.
  */
 function updateBackground() {
-  getProfilesFromDB({}).then(function(profs) {
-    profiles = profs;
-    var images = profs.map(function(profile) {
+  getProfilesFromDB({}, 'username image').then(function(profiles) {
+    var images = profiles.map(function(profile) {
       return {
         username: '@' + profile.username,
         image: profile.image
@@ -83,6 +81,52 @@ function shuffle(array) {
 }
 
 /**
+ * Gets the most recent picture associated with the #running Twitter feed
+ */
+var getRunningImage = function(searchTweets, cb) {
+  // Build query parameters
+  var params = {
+    count: 100,
+    lang: 'en',
+    result_type: 'popular',
+    filter: 'images'
+  }
+
+  // Search for recent popular tweets with #running
+  searchTweets('#running', params, true)
+  .then(function(tweets) {
+    if (!tweets)
+      return null;
+
+    // Get existing running images to ensure no duplicates
+    return getHashtagsFromDB({}, 'image')
+    .then(function(hashtags) {
+      // Find the first image in the returned tweets that has not been used
+      var imageURL, freshImage;
+      for (var i=0; i < tweets.length; i++) {
+        if (tweets[i].entities && tweets[i].entities.media) {
+          imageURL = tweets[i].entities.media[0].media_url_https;
+          freshImage = true;
+          hashtags.forEach(function(hashtag) {
+            if (hashtag.image === (imageURL+':thumb'))
+              freshImage = false;
+          });
+
+          // If a new image or last picture available, use the pic
+          if (freshImage || i === tweets.length-1) {
+            imageURL = tweets[i].entities.media[0].media_url_https;
+            break;
+          }
+        }
+      }
+
+      // Return the thumbnail of the retrieved image
+      cb(imageURL + ':thumb');
+    });
+  });
+}
+
+/**
  * Gets unique users who have recently tweeted using input hashtag
  * Users must not currently exist in the DB
  */
@@ -93,13 +137,13 @@ var getUniqueUsers = function(searchTweets, hashtag, cb) {
 
   // Build query parameters
   var params = {
-    count: MAX_COUNT,
+    count: 20,
     lang: 'en',
     include_entities: false
   }
 
-  // Search for 100 more tweets
-  searchTweets("#"+hashtag, params)
+  // Search for recent tweets with the input hashtag
+  searchTweets('#'+hashtag, params, false)
   .then(function(tweets) {
     for (var i=0; i < tweets.length; i++) {
       user = tweets[i].user;
@@ -148,12 +192,12 @@ router.post('/personality/', function(req, res) {
 });
 
 /**
- * Retrieve 20 users who use a hashtag and retrieve their tweets
+ * Find 20 users who recently used the input hashtag and get their tweets
 */
 router.get('/twitter/@:hashtag', function (req, res) {
   var hashtag = req.params.hashtag;
   if (!hashtag)
-    return res.render('index', {info: 'You need to provide a hashtag.'});
+    return res.render('index', {info:'You need to provide a hashtag.'});
 
   // Declare some promises to handle twitter and personality_insights req
   var searchTweets   = Q.denodeify(req.twit.searchTweets.bind(req.twit)),
@@ -162,18 +206,23 @@ router.get('/twitter/@:hashtag', function (req, res) {
 
   // Retrieve unique users who have recently tweeted with the input hashtag
   getUniqueUsers(searchTweets, hashtag, function(userMap) {
-    if (!userMap.count())
-      return;
+    if (!userMap)
+      return res.render('index', {error: 'Error getting users for #' + hashtag, pics:pics});
+    else if (!userMap.count())
+      return res.render('index', {info: 'No new users found for #' + hashtag, pics:pics});
 
     var usersArray = userMap.values();
     var promises = [];
     for (var i=0; i < usersArray.length; i++) {
-      promises.push(getTweets({screen_name:usersArray[i].username,limit:200}));
+      promises.push(getTweets({screen_name:usersArray[i].username, limit:200}));
     }
 
     // Retrieve each user's tweet history
     Q.all(promises)
     .then(function(userTweets) {
+      if (!userTweets)
+        return res.render('index', {error: 'Error getting tweets for #' + hashtag + ' users', pics:pics});
+
       promises = [];
       var user,
         hashPic,
@@ -181,7 +230,7 @@ router.get('/twitter/@:hashtag', function (req, res) {
         saveProfilePromises = [];
 
       // Grab each users tweets and associate with user object
-      userTweets.forEach(function(tweets){
+      userTweets.forEach(function(tweets) {
         user = userMap.get(tweets[0].userid.toString())
         console.log(user.username, 'has', tweets.length, 'tweets');
 
@@ -191,16 +240,20 @@ router.get('/twitter/@:hashtag', function (req, res) {
         promises.push(saveProfileInDB(user));
       });
 
-      // Retrieve each user's tweet history
+      // Remove items from hashmap to avoid memory loss
+      userMap.clear();
+
+      // Retrieve each user's tweet history and
       Q.all(promises)
       .then(function(users) {
-        console.log ('Users for #' + hashtag, 'saved to DB');
+        if (!users)
+          return res.render('index', {error: 'Error saving users and their tweets for #' + hashtag, pics:pics});
+
+        console.log ('Users for #' + hashtag, 'saved to the database');
+        return res.render('index', {info: 'Users for #' + hashtag + ' saved to the database', pics:pics});
       });
     });
   });
-
-  updateBackground();
-  res.render('index', {info: 'Retrieving #' + hashtag + ' users', pics:pics});
 });
 
 /**
@@ -211,24 +264,18 @@ router.get('/personality/@:hashtag', function (req, res) {
   if (!hashtag)
     return res.render('index', {info: 'You need to provide a hashtag.'});
 
-  updateBackground();
-  Profile.find({hashtag:hashtag}, function(err, profiles) {
-  if (err) {
-    console.log(err)
-    console.log('Error retrieving #' + hashtag, 'users');
-    return;
-  }
-  else if (!profiles || !profiles.length) {
-    console.log('No #' + hashtag, 'users found in database');
-    return;
-  }
-  else
-    var hashTweets = [],
-      hashPic;
+  getProfilesFromDB({hashtag:hashtag}, 'tweetlog', function(err, profiles) {
+    if (err) {
+      console.log(err)
+      console.log('Error retrieving #' + hashtag, 'users');
+      return res.render('index', {error: 'Error retrieving #' + hashtag + ' users', pics:pics});
+    }
+    else if (!profiles || !profiles.length)
+      return res.render('index', {info: 'No users for #' + hashtag + ' found in the database', pics:pics});
 
     // Concatenate all tweets into a single array
+    var hashTweets = [];
     profiles.forEach(function(profile){
-      if (!hashPic) hashPic = profile.image;
       hashTweets = hashTweets.concat(JSON.parse(profile.tweetlog));
     });
 
@@ -242,26 +289,35 @@ router.get('/personality/@:hashtag', function (req, res) {
     return getProfile({contentItems:hashTweets})
     .then(function(personality) {
       if (!personality)
-        console.log("Error analyzing personality for #" + hashtag);
-      console.log('#' + hashtag, 'analyzed with personality insights');
-      var hashtagObject = {
-        hashtag: hashtag,
-        users: profiles.length,
-        image: hashPic,
-        personality: JSON.stringify(personality)
-      }
+        return res.render('index', {error: 'Error analyzing personality for #' + hashtag, pics:pics});
 
-      // Save hashtag in database with the personality
-      return saveHashtagInDB(hashtagObject)
-      .then(function(savedHashtag) {
-        if (!savedHashtag)
-          console.log("Error saving #" + hashtag);
-        console.log('#' + hashtag, 'saved to the database');
+      console.log('#' + hashtag, 'analyzed with personality insights');
+
+      // Get image from #running feed to associate with the new hashtag object
+      var searchTweets = Q.denodeify(req.twit.searchTweets.bind(req.twit));
+      getRunningImage(searchTweets, function(imageURL) {
+        if (!imageURL)
+          return res.render('index', {error: 'Error retrieving an image for #' + hashtag, pics:pics});
+
+        var hashtagObject = {
+          hashtag: hashtag,
+          users: profiles.length,
+          image: imageURL,
+          personality: JSON.stringify(personality)
+        }
+
+        // Save hashtag in database with the personality
+        return saveHashtagInDB(hashtagObject)
+        .then(function(savedHashtag) {
+          if (!savedHashtag)
+            return res.render('index', {error: 'Error saving #' + hashtag + ' personality analysis to the database', pics:pics});
+
+          console.log('#' + hashtag, 'saved to the database');
+          return res.render('index', {info: 'Personality analysis for #' + hashtag + ' has been completed and stored in the database', pics:pics});
+        });
       });
     });
   });
-
-  res.render('index', {info: 'Analyzing personality of #' + hashtag + ' users', pics:pics});
 });
 
 router.get('twitter/:hashtag', function(req, res) {

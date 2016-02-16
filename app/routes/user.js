@@ -27,18 +27,18 @@ var router   = require('express').Router(),
 
 // We're only going to hit the db once for these
 var pics = [];
-var profiles = [];
 var hashtags = [];
 var getProfilesFromDB = Q.denodeify(Profile.find.bind(Profile)),
-  getHashtagsFromDB = Q.denodeify(Hashtag.find.bind(Hashtag));
+  getHashtagsFromDB = Q.denodeify(Hashtag.find.bind(Hashtag)),
+  getUserFromDB = Q.denodeify(User.findOne.bind(User)),
+  saveUserInDB = Q.denodeify(User.createOrUpdate.bind(User));
 
 /**
  * Updates an array with the profile pictures.
  */
 function updateBackground() {
-  getProfilesFromDB({}).then(function(profs) {
-    profiles = profs;
-    var images = profs.map(function(profile) {
+  getProfilesFromDB({}, 'username image').then(function(profiles) {
+    var images = profiles.map(function(profile) {
       return {
         username: '@' + profile.username,
         image: profile.image
@@ -78,7 +78,7 @@ function shuffle(array) {
 // Render the home page
 router.get('/', function (req, res) {
   updateBackground();
-  res.render('index',{pics:pics});
+  res.render('index', {pics:pics});
 });
 
 router.post('/', function(req, res) {
@@ -96,15 +96,12 @@ router.post('/', function(req, res) {
 router.get('/like/@:username', function (req, res) {
   var username = req.params.username;
   if (!username)
-    return res.render('index', {info: 'You need to provide a username.',pics:pics});
+    return res.render('index', {info:'You need to provide a username.', pics:pics});
 
   // Declare some promises to handle database/twitter and personality_insights req
   var showUser   = Q.denodeify(req.twit.showUser.bind(req.twit)),
     getTweets  = Q.denodeify(req.twit.getTweets.bind(req.twit)),
-    getProfile = Q.denodeify(req.personality_insights.profile.bind(req.personality_insights)),
-    getUserFromDB = Q.denodeify(User.findOne.bind(User)),
-    saveUserInDB = Q.denodeify(User.createOrUpdate.bind(User)),
-    getHashTagsFromDB = Q.denodeify(Hashtag.find.bind(Hashtag));
+    getProfile = Q.denodeify(req.personality_insights.profile.bind(req.personality_insights));
 
   showUser(username)
   .then(function(user) {
@@ -114,41 +111,32 @@ router.get('/like/@:username', function (req, res) {
       return;
     else if (user.protected)
       return res.render('index',
-        { info: '@' + username + ' is protected, try another one.', pics: pics});
+        {info: '@' + username + ' is protected, try another one.', pics:pics});
 
-    return getProfilesFromDB({id:user.id})
-    .then(function(profile){
-      if (profile && profile.length === 0) {
-        console.log(user.username, 'is not a runner, lets see if they are in the database');
-        return getUserFromDB({id:user.id})
-        .then(function(dbUser) {
-          if (dbUser) {
-            console.log(username, 'found in the database');
-            return extend(dbUser, user);
-          }
-          else {
-            console.log(username, 'is a new user, lets get their tweets');
+    return getUserFromDB({id:user.id})
+    .then(function(dbUser) {
+      if (dbUser) {
+        console.log(username, 'found in the database');
+        return extend(dbUser, user);
+      }
+      else {
+        console.log(username, 'is a new user, lets get their tweets');
 
-            // Get the tweets, profile and add them to the database
-            return getTweets({screen_name:username})
-              .then(function(tweets) {
-                console.log(username, 'has', tweets.length, 'tweets');
-                return getProfile({contentItems:tweets})
-                .then(function(profile) {
-                  if (!profile)
-                    return;
-                  console.log(username, 'analyze with personality insights');
+        // Get the tweets, profile and add them to the database
+        return getTweets({screen_name:username})
+          .then(function(tweets) {
+            console.log(username, 'has', tweets.length, 'tweets');
+            return getProfile({contentItems:tweets})
+            .then(function(profile) {
+              if (!profile)
+                return;
+              console.log(username, 'analyze with personality insights');
 
-                  user.personality = JSON.stringify(profile);
-                  console.log('adding', username, 'to the database');
-                  return saveUserInDB(user);
-                });
-              });
-          }
-        });
-      } else {
-        console.log(user.username,'is a runner, we return the profile from the DB');
-        return extend(profile[0], user);
+              user.personality = JSON.stringify(profile);
+              console.log('adding', username, 'to the database');
+              return saveUserInDB(user);
+            });
+          });
       }
     })
     .then(function(dbUser) {
