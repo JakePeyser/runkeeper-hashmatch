@@ -1,6 +1,6 @@
 # runkeeper-hashmatch Overview
 
-Runkeeper Hashmatch uses the IBM Watson [Personality Insights service][pi_docs] and [Twitter][twitter_url] to match you with the users who tweet using a popular running hashtag. Twitter is used to get the tweets for a given Twitter handle, the text from those tweets is sent to Personality Insights, which analyzes the text and replies with a personality profile. That profile is compared to against aggregated personality profiles of the users who tweet using specific running hashtags
+Runkeeper Hashmatch uses the IBM Watson [Personality Insights service][pi_docs] and [Twitter][twitter_url] to match you with the specific running hashtags. After inputting your Twitter handle, your tweets are sent to Personality Insights to analyze the text and output a personality profile. That profile is compared against the profiles of popular running hashtags, giving us a visualization of what hashtag you most align with. For more information on how the hashtag profiles are compiled, check out the [Analyzing Hashtag Data section][github_analyze_section_url] below.
   
 [![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy)
 
@@ -139,6 +139,22 @@ Your app will be automatically assigned to a port which will be logged to your t
 **`/analyze/personality/@hashtag`:** Aggregates users' tweets for the input hashtag and runs them through the Personality Insights API, saving the results in the `hashtags` collection in the database. If analysis for the hashtag already exists, it is overwritten with the new results
 
 **Note:** Keep the [Twitter API rate limiting policy][twitter_rate_limit_url] in mind, as the first route hits the API an average of 25 times per call.
+
+## Routes
+
+**`/like/@handle`:** Runs the Runkeeper Hashmatch algorithm on the input Twitter handle.
+
+**`/lists/profiles`:** Lists the individuals whose tweets have been used as input for the personality analysis of the running hashtags.
+
+**`/lists/users`:** Lists the users whose tweets have previously been analyzed by Personality Insights and compared to the aggregate personalities of the running hashtags.
+
+**`/lists/hashtags`:** Lists the running hashtags and the number of respective users whose tweets were included as a part of their personality analysis.
+
+**`/data/profiles`:** Sends back all profiles in the database in JSON format. Additional routes of `id/@id` and `hashtag/@hashtag` are available for returning a subset of profiles.
+
+**`/data/users`:** Sends back all users in the database in JSON format. The additional route of `id/@id` is available for returning a unique user.
+
+**`/data/hashtags`:** Sends back all hashtags in the database in JSON format. The additional route of `hashtag/@hashtag` is available for returning a unique hashtag.
 
 ## Troubleshooting
 
