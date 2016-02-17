@@ -155,7 +155,7 @@
 .type-buttons {
   text-align: center;
   margin-top: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .type-btn {
@@ -166,11 +166,11 @@
 }
 
 .switch-button-active {
-  background-color: #8cd211;
+  background-color: #8c9ba5;
 }
 
 .switch-button-disabled {
-  background-color: #5aaafa;
+  background-color: #394b54;
 }
 
 #pswitch {
