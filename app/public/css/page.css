@@ -69,7 +69,6 @@
 
 .avatars-row {
   margin-top: -37px;
-  margin-bottom: 1.875rem;
 }
 
 .avatar,
@@ -147,6 +146,51 @@
 }
 .similar-to span {
   color: #5aaafa;
+}
+
+.hide-traits {
+  display: none;
+}
+
+.type-buttons {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+.type-btn {
+  display: inline-block;
+  font-size: 1rem;
+  width: 5.5rem;
+  padding: 2px;
+}
+
+.switch-button-active {
+  background-color: #8cd211;
+}
+
+.switch-button-disabled {
+  background-color: #5aaafa;
+}
+
+#pswitch {
+  text-decoration: none;
+  color: white;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+#nswitch {
+  text-decoration: none;
+  color: white;
+  border: 1px solid white;
+}
+
+#vswitch {
+  text-decoration: none;
+  color: white;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
 }
 
 .me,
@@ -359,7 +403,6 @@
   line-height: 20px;
 }
 .social-media .twitter {
-  display: inline-block;
   width: 76px;
   position: relative;
   margin-left: .5rem;

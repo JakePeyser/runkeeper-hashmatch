@@ -146,18 +146,22 @@ router.get('/like/@:username', function (req, res) {
       return getHashtagsFromDB({})
       .then(function(hashtags) {
         console.log(dbUser.username,' to be compared to', hashtags.length, 'hashtags');
-        var distances = util.calculateDistances(dbUser, hashtags);
-
-        // Remove profiles to match to themselves
-        if (distances[0].distance === 1.00)
-          distances = distances.slice(1);
+        var personalityDistances = util.calculateDistances(dbUser, hashtags, 0),
+          needsDistances = util.calculateDistances(dbUser, hashtags, 1),
+          valuesDistances = util.calculateDistances(dbUser, hashtags, 2);
 
         var ret = {
           user: dbUser,
-          user_profile: flatten.traits(dbUser.personality, 0),
+          user_personality_profile: flatten.traits(dbUser.personality, 0),
+          user_needs_profile: flatten.traits(dbUser.personality, 1),
+          user_values_profile: flatten.traits(dbUser.personality, 2),
           // return only the 6 most similar/different profiles
-          similar_hashtags: distances.slice(0, Math.min(6, distances.length)),
-          different_hashtags: distances.reverse().slice(0, Math.min(6, distances.length)),
+          similar_personality_hashtags: personalityDistances.slice(0, Math.min(6, personalityDistances.length)),
+          different_personality_hashtags: personalityDistances.reverse().slice(0, Math.min(6, personalityDistances.length)),
+          similar_needs_hashtags: needsDistances.slice(0, Math.min(6, needsDistances.length)),
+          different_needs_hashtags: needsDistances.reverse().slice(0, Math.min(6, needsDistances.length)),
+          similar_values_hashtags: valuesDistances.slice(0, Math.min(6, valuesDistances.length)),
+          different_values_hashtags: valuesDistances.reverse().slice(0, Math.min(6, valuesDistances.length)),
           pics: pics
         };
 

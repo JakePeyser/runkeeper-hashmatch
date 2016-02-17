@@ -126,6 +126,13 @@ button.button, a.button {
 }
 
 /**
+* Description Style
+*/
+.description {
+  margin-bottom: 10px;
+}
+
+/**
 * Alert Styles
 */
 .alert-info {

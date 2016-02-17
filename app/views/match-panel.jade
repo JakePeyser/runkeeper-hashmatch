@@ -1,5 +1,6 @@
-
-- var traits = [['Cautious','Curious'],['Organized','Easy Going'],['Outgoing','Reserved'],['Sensitive','Confident'],['Compassionate','Analytical']]
+- var personalityTraits = [['Cautious','Curious'],['Organized','Easy Going'],['Outgoing','Reserved'],['Sensitive','Confident'],['Compassionate','Analytical']]
+- var needsTraits = [['Challenge','Challenge'],['Closeness','Closeness'],['Curiosity','Curiosity'],['Excitement','Excitement'],['Independence','Empathy'],['Ideal','Ideal'],['Liberty','Liberty'],['Love','Love'],['Practicality','Practicality'],['Self-expression','Self-expression'],['Stability','Stability'],['Structure','Structure']]
+- var valuesTraits = [['Conservation','Conservation'],['Openness to change','Openness to change'],['Hedonism','Hedonism'],['Self-enhancement','Self-enhancement'],['Self-transcendence','Self-transcendence']]
 	div.your-personality
 		div.description
 			p
@@ -34,21 +35,53 @@
 			div.text-center
 				p.avatar-name
 					a.cel_username
-each trait, i in traits
-	.row.trait-row
+	.row.type-row
+		.col-sm-offset-3.col-xs-offset-1.col-sm-6.col-xs-10
+			div.type-buttons
+				a.type-btn.switch-button-active.personality-switch(id='pswitch' href='javascript:void(0);') Personality
+				a.type-btn.switch-button-disabled.needs-switch(id='nswitch' href='javascript:void(0);') Needs
+				a.type-btn.switch-button-disabled.values-switch(id='vswitch' href='javascript:void(0);') Values
+each trait, i in personalityTraits
+	.row.trait-row.personality
 		.col-md-3
 			p.text-right #{trait[0]}
 		.col-md-3.col-md-push-6
 			p.text-left #{trait[1]}
 		.col-md-6.col-md-pull-3
 			div.measuring-bar
-				div.point.mep(style='left:calc(#{user_profile[i].value * 100 }%)')
-				div.point.celebrityp(id='trait_#{i}')
+				div.point.mep(style='left:calc(#{user_personality_profile[i].value * 100 }%)')
+				div.point.celebrityp(id='personality_trait_#{i}')
+each trait, i in needsTraits
+	.row.trait-row.needs.hide-traits
+		.col-md-3
+			p.text-right #{trait[0]}
+		.col-md-3.col-md-push-6
+			p.text-left #{trait[1]}
+		.col-md-6.col-md-pull-3
+			div.measuring-bar
+				div.point.mep(style='left:calc(#{user_needs_profile[i].value * 100 }%)')
+				div.point.celebrityp(id='needs_trait_#{i}')
+each trait, i in valuesTraits
+	.row.trait-row.values.hide-traits
+		.col-md-3
+			p.text-right #{trait[0]}
+		.col-md-3.col-md-push-6
+			p.text-left #{trait[1]}
+		.col-md-6.col-md-pull-3
+			div.measuring-bar
+				div.point.mep(style='left:calc(#{user_values_profile[i].value * 100 }%)')
+				div.point.celebrityp(id='values_trait_#{i}')
 div.more-info
 	a.how-it-works-link(href='javascript:void(0);') How'd we get this?
 div.social-media
 	div.social-media-buttons
 		h6 Share this result:
-		div.twitter
-			a.twitter-share-button(href='https://twitter.com/share', data-text="'#{user.name}'s personality is #{Math.round(similar_hashtags[0].distance * 100)}% similar to users who tweet with ##{similar_hashtags[0].hash.hashtag} #RunkeeperHashMatch")
+		div.twitter.personality
+			a.twitter-share-button(href='https://twitter.com/share', data-text="'#{user.name}'s personality is #{Math.round(similar_personality_hashtags[0].distance * 100)}% similar to users who tweet with ##{similar_personality_hashtags[0].hashtag} #RunkeeperHashMatch")
+				| Tweet
+		div.twitter.needs.hide-traits
+			a.twitter-share-button(href='https://twitter.com/share', data-text="'#{user.name}'s needs are #{Math.round(similar_needs_hashtags[0].distance * 100)}% similar to users who tweet with ##{similar_needs_hashtags[0].hashtag} #RunkeeperHashMatch")
+				| Tweet
+		div.twitter.values.hide-traits
+			a.twitter-share-button(href='https://twitter.com/share', data-text="'#{user.name}'s values are #{Math.round(similar_values_hashtags[0].distance * 100)}% similar to users who tweet with ##{similar_values_hashtags[0].hashtag} #RunkeeperHashMatch")
 				| Tweet

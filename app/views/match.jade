@@ -58,15 +58,33 @@ block content
               | to you
           .panel-body
             .row
-              each c, index in similar_hashtags
-                .col-sm-4.col-xs-6.text-center.other-celeb
+              each c, index in similar_personality_hashtags
+                .col-sm-4.col-xs-6.text-center.other-celeb.personality
                   .avatar-small
                     div.overlay-green
                       div.percentage
                         h4 #{Math.round(c.distance * 100)}%
-                    img(title='Compare me to ##{c.hash.hashtag}', alt='##{c.hash.hashtag} picture', src='#{c.hash.image}',id='s_#{index}')
+                    img(title='Compare me to ##{c.hashtag}', alt='##{c.hashtag} picture', src='#{c.image}',id='s_#{index}')
                   h5
-                    h5 ##{c.hash.hashtag}
+                    h5 ##{c.hashtag}
+              each c, index in similar_needs_hashtags
+                .col-sm-4.col-xs-6.text-center.other-celeb.needs.hide-traits
+                  .avatar-small
+                    div.overlay-green
+                      div.percentage
+                        h4 #{Math.round(c.distance * 100)}%
+                    img(title='Compare me to ##{c.hashtag}', alt='##{c.hashtag} picture', src='#{c.image}',id='s_#{index}')
+                  h5
+                    h5 ##{c.hashtag}
+              each c, index in similar_values_hashtags
+                .col-sm-4.col-xs-6.text-center.other-celeb.values.hide-traits
+                  .avatar-small
+                    div.overlay-green
+                      div.percentage
+                        h4 #{Math.round(c.distance * 100)}%
+                    img(title='Compare me to ##{c.hashtag}', alt='##{c.hashtag} picture', src='#{c.image}',id='s_#{index}')
+                  h5
+                    h5 ##{c.hashtag}
       .col-md-6.most-different
         .panel-comparisons
           .panel-heading
@@ -76,14 +94,34 @@ block content
               | from you
           .panel-body
             .row
-              each c,index in  different_hashtags
-                .col-sm-4.col-xs-6.text-center.other-celeb
+              each c,index in different_personality_hashtags
+                .col-sm-4.col-xs-6.text-center.other-celeb.personality
                   .avatar-small
                     div.overlay-red
                       div.percentage
                         h4 #{Math.round(c.distance * 100)}%
-                    img(title='Compare me to ##{c.hash.hashtag}', alt='##{c.hash.hashtag} picture', src='#{c.hash.image}',id='d_#{index}')
-                  h5 ##{c.hash.hashtag}
+                    img(title='Compare me to ##{c.hashtag}', alt='##{c.hashtag} picture', src='#{c.image}',id='d_#{index}')
+                  h5 ##{c.hashtag}
+              each c,index in different_needs_hashtags
+                .col-sm-4.col-xs-6.text-center.other-celeb.needs.hide-traits
+                  .avatar-small
+                    div.overlay-red
+                      div.percentage
+                        h4 #{Math.round(c.distance * 100)}%
+                    img(title='Compare me to ##{c.hashtag}', alt='##{c.hashtag} picture', src='#{c.image}',id='d_#{index}')
+                  h5 ##{c.hashtag}
+              each c,index in different_values_hashtags
+                .col-sm-4.col-xs-6.text-center.other-celeb.values.hide-traits
+                  .avatar-small
+                    div.overlay-red
+                      div.percentage
+                        h4 #{Math.round(c.distance * 100)}%
+                    img(title='Compare me to ##{c.hashtag}', alt='##{c.hashtag} picture', src='#{c.image}',id='d_#{index}')
+                  h5 ##{c.hashtag}
     script(type='text/javascript').
-      var similar_hashtags =!{JSON.stringify(similar_hashtags)};
-      var different_hashtags =!{JSON.stringify(different_hashtags)};
+      var similar_personality_hashtags =!{JSON.stringify(similar_personality_hashtags)};
+      var different_personality_hashtags =!{JSON.stringify(different_personality_hashtags)};
+      var similar_needs_hashtags =!{JSON.stringify(similar_needs_hashtags)};
+      var different_needs_hashtags =!{JSON.stringify(different_needs_hashtags)};
+      var similar_values_hashtags =!{JSON.stringify(similar_values_hashtags)};
+      var different_values_hashtags =!{JSON.stringify(different_values_hashtags)};

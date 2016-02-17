@@ -88,14 +88,16 @@ module.exports = {
    * Calculate the euclidean distance between user and hashtags
    * @param  {Object} user the user object
    * @param  {Array} hashtags the hashtags
+   * @param  {Array} type the type of profile distances being calculated
    * @return {Array} hashtags and distances
    */
-  calculateDistances: function(user, hashtags) {
+  calculateDistances: function(user, hashtags, type) {
     return hashtags.map(function(hashtag) {
       var ret = {
-        hash: hashtag,
-        distance: similarity(user.personality, hashtag.personality, 0),
-        profile: flatten.traits(hashtag.personality, 0)
+        hashtag: hashtag.hashtag,
+        image: hashtag.image,
+        distance: similarity(user.personality, hashtag.personality, type),
+        profile: flatten.traits(hashtag.personality, type)
       };
       return ret;
     }).sort(profileSort);
