@@ -39,6 +39,7 @@ var appEnv = cfenv.getAppEnv(appEnvOpts);
 require('./app/models/profile');
 require('./app/models/user');
 require('./app/models/hashtag');
+require('./app/models/image');
 
 // Mongoose by default sets the auto_reconnect option to true.
 // Recommended a 30 second connection timeout because it allows for

@@ -152,9 +152,11 @@ Your app will be automatically assigned to a port which will be logged to your t
 
 **`/data/profiles`:** Sends back all profiles in the database in JSON format. Additional routes of `id/@id` and `hashtag/@hashtag` are available for returning a subset of profiles.
 
-**`/data/users`:** Sends back all users in the database in JSON format. The additional route of `id/@id` is available for returning a unique user.
+**`/data/users`:** Sends back all users in thee database in JSON format. The additional route of `id/@id` is available for returning a unique user.
 
 **`/data/hashtags`:** Sends back all hashtags in the database in JSON format. The additional route of `hashtag/@hashtag` is available for returning a unique hashtag.
+
+**`/data/images`:** Sends back all images for hashtags in the database in JSON format. The additional route of `add/@url` is available for adding additional images.
 
 ## Troubleshooting
 

@@ -20,7 +20,8 @@ var router = require('express').Router(),
   Q        = require('q'),
   Profile  = mongoose.model('Profile'),
   User     = mongoose.model('User'),
-  Hashtag  = mongoose.model('Hashtag');
+  Hashtag  = mongoose.model('Hashtag'),
+  Image  = mongoose.model('Image');
 
 //=====PROFILES=================================================================
 
@@ -197,6 +198,63 @@ router.get('/hashtags/hashtag/@:hashtag', function(req,res) {
 
 router.get('/hashtags/hashtag/:hashtag', function(req, res) {
   res.redirect('/data/hashtags/hashtag/@' + req.params.hashtag);
+});
+
+//=====IMAGES===================================================================
+
+/**
+ * Send the hashtag data
+*/
+router.get('/images', function(req,res) {
+  Image.find({}, function(err,images) {
+    if (err)
+      res.json({error: err});
+    else
+      res.json({count:images.length, images: images});
+  });
+});
+
+router.get('/images/reset', function(req,res) {
+  console.log('removing images from database');
+  var removeAll = Q.denodeify(Image.remove.bind(Image));
+
+  removeAll({}).then(function(){
+    res.redirect('/');
+  })
+  .catch(function (error) {
+    console.log('error', error);
+    res.redirect('/');
+  });
+});
+
+router.post('/images/add/', function(req, res) {
+  var url = req.body.url;
+  if (url && url.substr(0,1) !== '@') {
+    url = '@' + url;
+  }
+  res.redirect(url ? '/images/add/' + url : '/');
+});
+
+router.get('/images/add/@:url', function(req,res) {
+  var url = req.params.url,
+    image = {url:url};
+
+  // Creates a image if one does not exist with that url
+  Image.checkExistence(image, function(err, returnedImage) {
+    if (err)
+      res.json({error: err});
+    else if (returnedImage.exists)
+      res.json({exists: true});
+    else {
+      Image.createOrUpdate(image, function(err, savedImage) {
+      res.json({exists: false, url: url});
+      });
+    }
+  });
+});
+
+router.get('/images/add/:url', function(req, res) {
+  res.redirect('/data/images/add/@' + req.params.url);
 });
 
 module.exports = router;

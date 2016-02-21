@@ -22,7 +22,8 @@ var router   = require('express').Router(),
   HashMap    = require('hashmap'),
   Profile    = mongoose.model('Profile'),
   User       = mongoose.model('User'),
-  Hashtag       = mongoose.model('Hashtag'),
+  Hashtag    = mongoose.model('Hashtag'),
+  Image      = mongoose.model('Image'),
   extend     = require('extend'),
   util       = require('../util/util');
 
@@ -34,7 +35,8 @@ var profileExistsInDB = Q.denodeify(Profile.checkExistence.bind(Profile)),
   saveProfileInDB = Q.denodeify(Profile.createOrUpdate.bind(Profile)),
   getProfilesFromDB = Q.denodeify(Profile.find.bind(Profile)),
   saveHashtagInDB = Q.denodeify(Hashtag.createOrUpdate.bind(Hashtag)),
-  getHashtagsFromDB = Q.denodeify(Hashtag.find.bind(Hashtag));
+  getHashtagsFromDB = Q.denodeify(Hashtag.find.bind(Hashtag)),
+  getImagesFromDB = Q.denodeify(Image.find.bind(Image));
 
 var MAX_COUNT = 20;
 
@@ -84,18 +86,11 @@ function shuffle(array) {
  * Gets the most recent picture associated with the #running Twitter feed
  */
 var getRunningImage = function(searchTweets, cb) {
-  // Build query parameters
-  var params = {
-    count: 100,
-    lang: 'en',
-    result_type: 'popular',
-    filter: 'images'
-  }
 
-  // Search for recent popular tweets with #running
-  searchTweets('#running', params, true)
-  .then(function(tweets) {
-    if (!tweets)
+  // Get all possible images from DB
+  getImagesFromDB({})
+  .then(function(images) {
+    if (!images)
       return null;
 
     // Get existing running images to ensure no duplicates
@@ -103,20 +98,16 @@ var getRunningImage = function(searchTweets, cb) {
     .then(function(hashtags) {
       // Find the first image in the returned tweets that has not been used
       var imageURL, freshImage;
-      for (var i=0; i < tweets.length; i++) {
-        if (tweets[i].entities && tweets[i].entities.media) {
-          imageURL = tweets[i].entities.media[0].media_url_https;
-          freshImage = true;
-          hashtags.forEach(function(hashtag) {
-            if (hashtag.image === (imageURL+':thumb'))
-              freshImage = false;
-          });
-
-          // If a new image or last picture available, use the pic
-          if (freshImage || i === tweets.length-1) {
-            imageURL = tweets[i].entities.media[0].media_url_https;
-            break;
-          }
+      for (var i=0; i < images.length; i++) {
+        freshImage = true;
+        hashtags.forEach(function(hashtag) {
+          if (hashtag.image === (images[i].url+':thumb'))
+            freshImage = false;
+        });
+        // If a new image or last image available, use the pic
+        if (freshImage || i === images.length-1) {
+          imageURL = images[i].url;
+          break;
         }
       }
 
