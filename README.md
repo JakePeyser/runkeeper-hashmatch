@@ -170,6 +170,8 @@ For more detailed information on troubleshooting your application, see the [Trou
 ## Contribute
 We are more than happy to accept external contributions to this project, be it in the form of issues and pull requests. If you find a bug, please report it via the [Issues section][issues_url] or even better, fork the project and submit a pull request with your fix! Pull requests will be evaulated on an individual basis based on value add to the sample application.
 
+Special thanks to the development team behind [Your Celebrity Match][celeb_match_url] for the code base that this application was built on.
+
 ## Privacy Notice
 The capital-weather sample web application includes code to track deployments to Bluemix and other Cloud Foundry platforms. The following information is sent to a [Deployment Tracker](https://github.com/cloudant-labs/deployment-tracker) service on each deployment:
 
@@ -201,4 +203,5 @@ Deployment tracking can be disabled by removing `require("cf-deployment-tracker-
 [mongo_service_url]: https://console.ng.bluemix.net/catalog/services/mongodb-by-compose/
 [pi_service_url]: https://console.ng.bluemix.net/catalog/services/personality-insights/
 [pi_docs]: http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/personality-insights/
+[celeb_match_url]: https://your-celebrity-match.mybluemix.net/
 [issues_url]: https://github.com/JakePeyser/runkeeper-hashmatch/issues
